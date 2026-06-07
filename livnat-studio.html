@@ -3,873 +3,699 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ליבנת סטודיו | ניהול תוכן</title>
+<title>ליבנת סטודיו</title>
 <style>
-  :root {
-    --bg: #f9f6f2;
-    --surface: #ffffff;
-    --border: #e8e0d8;
-    --accent: #c9a96e;
-    --accent-dark: #a07840;
-    --text: #2c2420;
-    --text-muted: #8a7a70;
-    --tag-organic: #4a7c59;
-    --tag-paid: #5c6bc0;
-    --danger: #d64045;
-    --radius: 14px;
-    --shadow: 0 2px 20px rgba(44,36,32,.08);
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+:root {
+  --cream: #faf7f3;
+  --warm: #f0e9df;
+  --border: #e4d9cc;
+  --gold: #c8a45a;
+  --gold-dark: #9a7535;
+  --gold-light: #f5e9d3;
+  --text: #1e1713;
+  --muted: #8c7a6b;
+  --surface: #ffffff;
+  --sidebar-w: 220px;
+  --radius: 16px;
+  --shadow: 0 4px 24px rgba(30,23,19,.07);
+  --shadow-lg: 0 8px 40px rgba(30,23,19,.13);
+  --organic: #3d7a56;
+  --paid: #4a5fc1;
+  --danger: #d63c41;
+  --success: #2e7d4f;
+  --editor-bg: #141210;
+  --editor-panel: #1c1a17;
+  --editor-border: #2e2a24;
+  --editor-muted: #6b6256;
+  --editor-text: #e8dfd4;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, 'Segoe UI', Arial, sans-serif;
+  background: var(--cream); color: var(--text);
+  min-height: 100vh; display: flex;
+  -webkit-font-smoothing: antialiased;
+}
 
-  /* ===== HEADER ===== */
-  header {
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    padding: 0 32px;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    height: 64px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    box-shadow: var(--shadow);
-  }
-  header .logo {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: var(--accent-dark);
-    letter-spacing: 1px;
-    flex: 1;
-  }
-  header .logo span { color: var(--text-muted); font-weight: 400; font-size: .9rem; margin-right: 8px; }
-  .btn {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 8px 16px; border-radius: 8px; font-size: .875rem;
-    cursor: pointer; border: none; transition: all .18s;
-    font-family: inherit; font-weight: 600;
-  }
-  .btn-primary { background: var(--accent); color: white; }
-  .btn-primary:hover { background: var(--accent-dark); }
-  .btn-ghost { background: transparent; color: var(--text-muted); border: 1.5px solid var(--border); }
-  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
-  .btn-sm { padding: 5px 11px; font-size: .78rem; }
+/* ── SIDEBAR ── */
+.sidebar {
+  width: var(--sidebar-w); background: var(--surface);
+  border-left: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  position: fixed; top: 0; right: 0; bottom: 0;
+  z-index: 50; transition: transform .25s;
+}
+.sidebar-logo {
+  padding: 22px 20px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.sidebar-logo .logo-name {
+  font-size: 1.05rem; font-weight: 800;
+  color: var(--gold-dark); letter-spacing: .3px;
+}
+.sidebar-logo .logo-sub {
+  font-size: .7rem; color: var(--muted); margin-top: 1px;
+}
+.sidebar-nav { flex: 1; padding: 14px 10px; display: flex; flex-direction: column; gap: 2px; }
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 12px; border-radius: 10px;
+  font-size: .85rem; font-weight: 600; color: var(--muted);
+  cursor: pointer; transition: all .15s; border: none;
+  background: transparent; width: 100%; text-align: right;
+  font-family: inherit;
+}
+.nav-item .ni { font-size: 1.05rem; flex-shrink: 0; }
+.nav-item:hover { background: var(--warm); color: var(--text); }
+.nav-item.active { background: var(--gold-light); color: var(--gold-dark); }
+.nav-divider { height: 1px; background: var(--border); margin: 8px 10px; }
+.sidebar-upload {
+  padding: 14px; border-top: 1px solid var(--border);
+}
+.upload-btn {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%; padding: 11px; border-radius: 12px;
+  background: var(--gold); color: white; font-size: .875rem;
+  font-weight: 700; cursor: pointer; border: none;
+  transition: background .15s; font-family: inherit;
+}
+.upload-btn:hover { background: var(--gold-dark); }
 
-  /* ===== MAIN LAYOUT ===== */
-  main { max-width: 1280px; margin: 0 auto; padding: 32px 24px; }
+/* ── MAIN ── */
+.main { margin-right: var(--sidebar-w); flex: 1; min-width: 0; }
 
-  /* ===== UPLOAD ZONE ===== */
-  .upload-zone {
-    border: 2px dashed var(--border);
-    border-radius: var(--radius);
-    padding: 40px;
-    text-align: center;
-    background: var(--surface);
-    cursor: pointer;
-    transition: all .2s;
-    margin-bottom: 32px;
-  }
-  .upload-zone:hover, .upload-zone.dragging {
-    border-color: var(--accent);
-    background: #fdf8f2;
-  }
-  .upload-zone .icon { font-size: 2.5rem; margin-bottom: 12px; }
-  .upload-zone h3 { font-size: 1.1rem; color: var(--text); margin-bottom: 6px; }
-  .upload-zone p { color: var(--text-muted); font-size: .875rem; }
-  #fileInput { display: none; }
+/* ── TOP BAR ── */
+.topbar {
+  height: 60px; background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; padding: 0 28px;
+  gap: 14px; position: sticky; top: 0; z-index: 40;
+}
+.topbar h1 { font-size: 1.05rem; font-weight: 700; flex: 1; }
+.topbar-actions { display: flex; gap: 8px; align-items: center; }
+.search-bar {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--warm); border-radius: 10px;
+  padding: 6px 12px; font-size: .82rem; color: var(--muted);
+  border: 1.5px solid transparent; transition: border .15s;
+}
+.search-bar:focus-within { border-color: var(--gold); background: white; }
+.search-bar input { border: none; background: transparent; outline: none; font-family: inherit; font-size: .82rem; color: var(--text); width: 140px; }
 
-  /* ===== TABS ===== */
-  .tabs { display: flex; gap: 4px; margin-bottom: 24px; border-bottom: 2px solid var(--border); }
-  .tab {
-    padding: 10px 20px; cursor: pointer; border-radius: 8px 8px 0 0;
-    font-size: .875rem; font-weight: 600; color: var(--text-muted);
-    border: none; background: transparent; transition: all .15s;
-    font-family: inherit;
-  }
-  .tab.active { color: var(--accent-dark); background: var(--surface); border: 2px solid var(--border); border-bottom: 2px solid var(--surface); margin-bottom: -2px; }
-  .tab-content { display: none; }
-  .tab-content.active { display: block; }
+/* ── BUTTONS ── */
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px; border-radius: 10px; font-size: .825rem;
+  cursor: pointer; border: none; transition: all .15s;
+  font-family: inherit; font-weight: 600;
+}
+.btn-primary { background: var(--gold); color: white; }
+.btn-primary:hover { background: var(--gold-dark); }
+.btn-ghost { background: transparent; color: var(--muted); border: 1.5px solid var(--border); }
+.btn-ghost:hover { border-color: var(--gold); color: var(--gold-dark); }
+.btn-sm { padding: 5px 11px; font-size: .76rem; }
+.btn-danger { background: var(--danger); color: white; }
+.btn-icon { padding: 7px; border-radius: 8px; }
 
-  /* ===== PROJECT GRID ===== */
-  .projects-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
-  .projects-header h2 { font-size: 1.1rem; }
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 16px;
-  }
-  .media-card {
-    background: var(--surface);
-    border-radius: var(--radius);
-    overflow: hidden;
-    border: 1.5px solid var(--border);
-    transition: transform .15s, box-shadow .15s;
-    cursor: pointer;
-    position: relative;
-  }
-  .media-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
-  .media-card.selected { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(201,169,110,.25); }
-  .media-card .thumb {
-    width: 100%; aspect-ratio: 1; object-fit: cover;
-    background: var(--border);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 2rem; color: var(--text-muted);
-  }
-  .media-card .thumb img, .media-card .thumb video { width: 100%; height: 100%; object-fit: cover; }
-  .media-card .info { padding: 8px 10px; }
-  .media-card .info .name { font-size: .78rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .media-card .info .meta { font-size: .7rem; color: var(--text-muted); margin-top: 2px; }
-  .media-card .check {
-    position: absolute; top: 8px; right: 8px;
-    width: 22px; height: 22px; border-radius: 50%;
-    background: var(--accent); color: white;
-    display: none; align-items: center; justify-content: center;
-    font-size: .7rem; font-weight: 700;
-  }
-  .media-card.selected .check { display: flex; }
-  .media-card .type-badge {
-    position: absolute; top: 8px; left: 8px;
-    background: rgba(0,0,0,.5); color: white;
-    border-radius: 5px; padding: 2px 6px; font-size: .65rem; font-weight: 700;
-  }
-  .empty-state { text-align: center; padding: 60px 20px; color: var(--text-muted); }
-  .empty-state .big { font-size: 3rem; margin-bottom: 12px; }
+/* ── PAGE CONTENT ── */
+.page { padding: 28px; display: none; }
+.page.active { display: block; }
 
-  /* ===== ACTION BAR ===== */
-  .action-bar {
-    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
-    background: var(--text); color: white;
-    padding: 12px 20px; border-radius: 50px;
-    display: none; align-items: center; gap: 12px;
-    box-shadow: 0 8px 30px rgba(0,0,0,.25); z-index: 200;
-    font-size: .875rem;
-  }
-  .action-bar.show { display: flex; }
-  .action-bar .count { background: var(--accent); border-radius: 50px; padding: 2px 10px; font-weight: 700; }
-  .action-bar .divider { width: 1px; height: 20px; background: rgba(255,255,255,.2); }
-  .action-btn {
-    display: flex; align-items: center; gap: 5px;
-    cursor: pointer; padding: 5px 12px; border-radius: 50px;
-    transition: background .15s; font-size: .78rem; font-weight: 600;
-    border: none; background: transparent; color: white; font-family: inherit;
-  }
-  .action-btn:hover { background: rgba(255,255,255,.15); }
+/* ── DROP ZONE ── */
+.drop-zone {
+  border: 2px dashed var(--border); border-radius: 18px;
+  padding: 36px 20px; text-align: center; background: var(--surface);
+  cursor: pointer; transition: all .2s; margin-bottom: 28px;
+}
+.drop-zone:hover, .drop-zone.over { border-color: var(--gold); background: var(--gold-light); }
+.drop-zone .dz-icon { font-size: 2.4rem; margin-bottom: 10px; }
+.drop-zone h3 { font-size: 1rem; margin-bottom: 5px; }
+.drop-zone p { font-size: .78rem; color: var(--muted); }
+#fileInput { display: none; }
 
-  /* ===== IN-APP EDITOR ===== */
-  .editor-overlay {
-    position: fixed; inset: 0; background: rgba(0,0,0,.85);
-    z-index: 400; display: none; flex-direction: column;
-  }
-  .editor-overlay.show { display: flex; }
-  .editor-topbar {
-    display: flex; align-items: center; gap: 12px;
-    padding: 10px 16px; background: #111; color: white; flex-shrink: 0;
-  }
-  .editor-topbar .etitle { font-size: .95rem; font-weight: 700; flex: 1; }
-  .editor-body { display: flex; flex: 1; overflow: hidden; }
-  .editor-canvas-wrap {
-    flex: 1; background: #1a1a1a;
-    display: flex; align-items: center; justify-content: center;
-    overflow: hidden; position: relative;
-  }
-  #editorCanvas { max-width: 100%; max-height: 100%; object-fit: contain; cursor: crosshair; }
-  #editorVideo { max-width: 100%; max-height: 100%; }
-  .editor-panel {
-    width: 280px; background: #1e1e1e; color: #eee;
-    overflow-y: auto; padding: 14px; flex-shrink: 0;
-    display: flex; flex-direction: column; gap: 14px;
-  }
-  .ep-section { border-top: 1px solid #333; padding-top: 12px; }
-  .ep-section:first-child { border-top: none; padding-top: 0; }
-  .ep-title { font-size: .68rem; text-transform: uppercase; letter-spacing: 1px; color: #888; margin-bottom: 8px; font-weight: 700; }
-  .ep-presets { display: flex; flex-wrap: wrap; gap: 6px; }
-  .ep-preset {
-    padding: 5px 10px; border-radius: 6px; font-size: .72rem; font-weight: 700;
-    cursor: pointer; border: 1.5px solid #444; background: #2a2a2a; color: #ddd;
-    transition: all .15s;
-  }
-  .ep-preset.active, .ep-preset:hover { border-color: var(--accent); color: var(--accent); background: #2f2818; }
-  .ep-slider-row { display: flex; flex-direction: column; gap: 4px; margin-bottom: 8px; }
-  .ep-slider-label { display: flex; justify-content: space-between; font-size: .72rem; color: #aaa; }
-  .ep-slider {
-    width: 100%; -webkit-appearance: none; height: 4px;
-    background: #444; border-radius: 2px; outline: none; cursor: pointer;
-  }
-  .ep-slider::-webkit-slider-thumb {
-    -webkit-appearance: none; width: 14px; height: 14px;
-    border-radius: 50%; background: var(--accent); cursor: pointer;
-  }
-  .ep-tools { display: flex; flex-wrap: wrap; gap: 6px; }
-  .ep-tool {
-    flex: 1; min-width: 56px; padding: 7px 4px; text-align: center;
-    border-radius: 8px; cursor: pointer; background: #2a2a2a; border: 1.5px solid #444;
-    font-size: .75rem; color: #ddd; transition: all .15s;
-  }
-  .ep-tool:hover { border-color: var(--accent); color: var(--accent); }
-  .ep-tool .ti { font-size: 1.1rem; display: block; margin-bottom: 2px; }
-  .ep-text-input {
-    width: 100%; padding: 7px 10px; border-radius: 8px; background: #2a2a2a;
-    border: 1.5px solid #444; color: #eee; font-family: inherit; font-size: .82rem;
-  }
-  .ep-text-input:focus { outline: none; border-color: var(--accent); }
-  .ep-colors { display: flex; gap: 6px; margin-top: 6px; }
-  .ep-color {
-    width: 22px; height: 22px; border-radius: 50%; cursor: pointer;
-    border: 2px solid transparent; transition: border-color .15s;
-  }
-  .ep-color.active { border-color: white; }
-  /* trim slider */
-  .trim-wrap { position: relative; margin-top: 4px; }
-  .trim-bar { width: 100%; height: 32px; background: #333; border-radius: 6px; position: relative; overflow: hidden; }
-  .trim-range { position: absolute; top: 0; height: 100%; background: rgba(201,169,110,.35); }
-  .trim-handles { display: flex; justify-content: space-between; gap: 8px; margin-top: 8px; }
-  .trim-handles input[type=range] { flex: 1; }
-  .trim-time { font-size: .72rem; color: #888; text-align: center; margin-top: 4px; }
+/* ── SECTION HEADER ── */
+.section-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 18px;
+}
+.section-header h2 { font-size: 1rem; font-weight: 700; }
+.section-header .sh-right { display: flex; gap: 8px; align-items: center; }
 
-  /* ===== MODAL ===== */
-  .modal-overlay {
-    position: fixed; inset: 0; background: rgba(0,0,0,.6);
-    z-index: 300; display: none; align-items: center; justify-content: center;
-    padding: 20px;
-  }
-  .modal-overlay.show { display: flex; }
-  .modal {
-    background: var(--surface); border-radius: 18px;
-    max-width: 680px; width: 100%;
-    max-height: 90vh; overflow-y: auto;
-    padding: 28px; box-shadow: 0 20px 60px rgba(0,0,0,.25);
-  }
-  .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
-  .modal-header h2 { font-size: 1.2rem; }
-  .modal-close { font-size: 1.4rem; cursor: pointer; color: var(--text-muted); border: none; background: none; line-height: 1; }
+/* ── MEDIA GRID ── */
+.media-grid {
+  columns: 4; column-gap: 14px;
+}
+@media (max-width: 900px) { .media-grid { columns: 3; } }
+@media (max-width: 600px) { .media-grid { columns: 2; } }
+.media-card {
+  break-inside: avoid; margin-bottom: 14px;
+  border-radius: 14px; overflow: hidden;
+  position: relative; cursor: pointer;
+  background: var(--border);
+  box-shadow: var(--shadow);
+  transition: transform .18s, box-shadow .18s;
+}
+.media-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+.media-card:hover .mc-overlay { opacity: 1; }
+.media-card.selected { outline: 3px solid var(--gold); outline-offset: 2px; }
+.media-card img, .media-card video {
+  width: 100%; display: block; object-fit: cover;
+}
+.mc-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(20,18,16,.7) 0%, transparent 50%);
+  opacity: 0; transition: opacity .18s;
+  display: flex; flex-direction: column; justify-content: flex-end;
+  padding: 10px;
+}
+.mc-overlay-top {
+  position: absolute; top: 8px; right: 8px; left: 8px;
+  display: flex; justify-content: space-between;
+}
+.mc-check {
+  width: 22px; height: 22px; border-radius: 6px;
+  background: rgba(255,255,255,.2); backdrop-filter: blur(4px);
+  border: 1.5px solid rgba(255,255,255,.5);
+  display: flex; align-items: center; justify-content: center;
+  font-size: .7rem; cursor: pointer; transition: all .15s;
+}
+.media-card.selected .mc-check { background: var(--gold); border-color: var(--gold); }
+.mc-type-badge {
+  padding: 2px 7px; border-radius: 6px; font-size: .62rem; font-weight: 700;
+  background: rgba(20,18,16,.55); color: white; backdrop-filter: blur(4px);
+}
+.mc-actions { display: flex; gap: 6px; }
+.mc-action {
+  padding: 5px 10px; border-radius: 8px; font-size: .72rem; font-weight: 700;
+  background: rgba(255,255,255,.15); backdrop-filter: blur(8px);
+  color: white; cursor: pointer; border: none; transition: background .15s;
+  font-family: inherit;
+}
+.mc-action:hover { background: var(--gold); }
+.mc-name { font-size: .72rem; color: rgba(255,255,255,.85); font-weight: 600; }
 
-  /* ===== EDIT TOOLS MODAL ===== */
-  .tools-grid {
-    display: grid; grid-template-columns: 1fr 1fr;
-    gap: 12px; margin-bottom: 20px;
-  }
-  .tool-card {
-    border: 1.5px solid var(--border); border-radius: 12px;
-    padding: 16px; cursor: pointer; transition: all .15s;
-    text-decoration: none; display: block;
-  }
-  .tool-card:hover { border-color: var(--accent); background: #fdf8f2; }
-  .tool-card .tool-icon { font-size: 1.8rem; margin-bottom: 8px; }
-  .tool-card .tool-name { font-size: .9rem; font-weight: 700; color: var(--text); margin-bottom: 3px; }
-  .tool-card .tool-desc { font-size: .75rem; color: var(--text-muted); }
-  .tool-card .tool-free { font-size: .65rem; background: #e8f5e9; color: #2e7d32; padding: 2px 7px; border-radius: 10px; display: inline-block; margin-top: 5px; font-weight: 600; }
+/* ── EMPTY STATE ── */
+.empty { text-align: center; padding: 60px 20px; color: var(--muted); }
+.empty .ei { font-size: 3.5rem; margin-bottom: 14px; }
+.empty h3 { font-size: 1rem; margin-bottom: 6px; color: var(--text); }
+.empty p { font-size: .82rem; }
 
-  /* ===== VIDEO TOOLS ===== */
-  .video-section { margin-bottom: 20px; }
-  .video-section h3 { font-size: .95rem; font-weight: 700; margin-bottom: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .5px; font-size: .75rem; }
-  .video-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
-  .video-item {
-    display: flex; align-items: center; gap: 10px;
-    background: var(--bg); border-radius: 8px; padding: 8px 12px;
-    font-size: .825rem;
-  }
-  .video-item .vi-icon { font-size: 1.2rem; }
-  .video-item .vi-name { flex: 1; font-weight: 600; }
-  .video-item .vi-duration { color: var(--text-muted); font-size: .75rem; }
-  .video-item .vi-remove { cursor: pointer; color: var(--danger); font-size: .8rem; border: none; background: none; padding: 2px 6px; }
-  .drag-handle { cursor: grab; color: var(--text-muted); }
+/* ── TOAST ── */
+.toast {
+  position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(20px);
+  background: var(--text); color: white; padding: 10px 20px;
+  border-radius: 50px; font-size: .82rem; z-index: 600;
+  opacity: 0; transition: all .3s; pointer-events: none; white-space: nowrap;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-  .transition-picker { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
-  .trans-btn {
-    padding: 6px 14px; border-radius: 8px; font-size: .78rem; font-weight: 600;
-    border: 1.5px solid var(--border); cursor: pointer; background: var(--surface);
-    color: var(--text); transition: all .15s; font-family: inherit;
-  }
-  .trans-btn.active { background: var(--accent); border-color: var(--accent); color: white; }
+/* ── FLOATING ACTION BAR ── */
+.fab {
+  position: fixed; bottom: 28px; right: calc(var(--sidebar-w) + 28px);
+  background: var(--text); color: white;
+  padding: 10px 18px; border-radius: 50px;
+  display: none; align-items: center; gap: 10px;
+  box-shadow: var(--shadow-lg); z-index: 200; font-size: .82rem;
+}
+.fab.show { display: flex; }
+.fab-count { background: var(--gold); border-radius: 50px; padding: 2px 9px; font-weight: 700; font-size: .78rem; }
+.fab-div { width: 1px; height: 18px; background: rgba(255,255,255,.2); }
+.fab-btn {
+  display: flex; align-items: center; gap: 5px;
+  cursor: pointer; padding: 4px 10px; border-radius: 50px;
+  border: none; background: transparent; color: white;
+  font-family: inherit; font-size: .75rem; font-weight: 600;
+  transition: background .15s;
+}
+.fab-btn:hover { background: rgba(255,255,255,.15); }
+.fab-btn.danger { color: #ff6b6b; }
 
-  .caption-area {
-    background: var(--bg); border-radius: 10px; padding: 12px;
-    margin-bottom: 16px;
-  }
-  .caption-area label { font-size: .78rem; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 6px; }
-  .caption-area input {
-    width: 100%; padding: 8px 10px; border-radius: 6px;
-    border: 1.5px solid var(--border); font-family: inherit;
-    font-size: .85rem; background: white;
-  }
-  .caption-style { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
-  .cap-style-btn {
-    padding: 4px 10px; font-size: .72rem; font-weight: 700;
-    border-radius: 6px; border: 1.5px solid var(--border);
-    cursor: pointer; background: var(--surface); font-family: inherit;
-    transition: all .15s;
-  }
-  .cap-style-btn.active { background: var(--text); color: white; border-color: var(--text); }
+/* ── MODAL ── */
+.modal-bg {
+  position: fixed; inset: 0; background: rgba(20,18,16,.6);
+  backdrop-filter: blur(4px); z-index: 300;
+  display: none; align-items: center; justify-content: center; padding: 20px;
+}
+.modal-bg.show { display: flex; }
+.modal {
+  background: var(--surface); border-radius: 20px;
+  max-width: 680px; width: 100%; max-height: 90vh;
+  overflow-y: auto; padding: 28px;
+  box-shadow: var(--shadow-lg);
+  animation: slideUp .22s ease;
+}
+@keyframes slideUp { from { opacity: 0; transform: translateY(20px); } }
+.modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; }
+.modal-header h2 { font-size: 1.15rem; font-weight: 800; }
+.modal-close { font-size: 1.2rem; cursor: pointer; color: var(--muted); border: none; background: none; line-height: 1; padding: 4px; border-radius: 6px; }
+.modal-close:hover { background: var(--warm); color: var(--text); }
 
-  /* ===== POST COPY MODAL ===== */
-  .post-type-toggle { display: flex; gap: 0; margin-bottom: 20px; border-radius: 10px; overflow: hidden; border: 1.5px solid var(--border); }
-  .post-type-btn {
-    flex: 1; padding: 10px; text-align: center; cursor: pointer;
-    font-size: .875rem; font-weight: 700; transition: all .15s;
-    border: none; background: var(--bg); font-family: inherit;
-    display: flex; align-items: center; justify-content: center; gap: 6px;
-  }
-  .post-type-btn.active.organic { background: var(--tag-organic); color: white; }
-  .post-type-btn.active.paid { background: var(--tag-paid); color: white; }
+/* ── POST MODAL ── */
+.post-type-row { display: flex; gap: 0; border-radius: 12px; overflow: hidden; border: 1.5px solid var(--border); margin-bottom: 22px; }
+.pt-btn {
+  flex: 1; padding: 10px; text-align: center; cursor: pointer;
+  font-size: .875rem; font-weight: 700; transition: all .15s;
+  border: none; background: var(--warm); font-family: inherit;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.pt-btn.active.organic { background: var(--organic); color: white; }
+.pt-btn.active.paid { background: var(--paid); color: white; }
+.form-row { margin-bottom: 14px; }
+.form-row label { display: block; font-size: .75rem; font-weight: 700; color: var(--muted); margin-bottom: 5px; text-transform: uppercase; letter-spacing: .5px; }
+.form-row input, .form-row select, .form-row textarea {
+  width: 100%; padding: 9px 12px; border-radius: 10px;
+  border: 1.5px solid var(--border); font-family: inherit;
+  font-size: .875rem; background: white; transition: border .15s; color: var(--text);
+}
+.form-row input:focus, .form-row select:focus, .form-row textarea:focus {
+  outline: none; border-color: var(--gold);
+}
+.form-row textarea { resize: vertical; min-height: 80px; }
+.generated-box {
+  background: var(--warm); border-radius: 14px; padding: 18px;
+  margin-top: 18px; font-size: .875rem; line-height: 1.7;
+  border: 1.5px solid var(--border); white-space: pre-wrap;
+  direction: rtl; font-family: inherit;
+}
+.post-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+.tag { display: inline-block; padding: 2px 9px; border-radius: 8px; font-size: .7rem; font-weight: 700; }
+.tag-organic { background: #e5f3ec; color: var(--organic); }
+.tag-paid { background: #eaecfb; color: var(--paid); }
 
-  .form-row { margin-bottom: 14px; }
-  .form-row label { display: block; font-size: .78rem; font-weight: 700; color: var(--text-muted); margin-bottom: 5px; }
-  .form-row input, .form-row select, .form-row textarea {
-    width: 100%; padding: 9px 12px; border-radius: 8px;
-    border: 1.5px solid var(--border); font-family: inherit;
-    font-size: .875rem; background: white; transition: border .15s;
-  }
-  .form-row input:focus, .form-row select:focus, .form-row textarea:focus {
-    outline: none; border-color: var(--accent);
-  }
-  .form-row textarea { resize: vertical; min-height: 80px; }
-  .form-row .hint { font-size: .7rem; color: var(--text-muted); margin-top: 3px; }
+/* ── HISTORY ── */
+.history-list { display: flex; flex-direction: column; gap: 10px; }
+.history-card {
+  background: var(--surface); border-radius: 14px; padding: 16px 18px;
+  border: 1.5px solid var(--border); transition: box-shadow .15s;
+}
+.history-card:hover { box-shadow: var(--shadow); }
+.hc-header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.hc-title { font-weight: 700; font-size: .875rem; flex: 1; }
+.hc-date { font-size: .7rem; color: var(--muted); }
+.hc-body { font-size: .82rem; color: var(--muted); line-height: 1.5; }
+.hc-actions { margin-top: 10px; display: flex; gap: 6px; }
 
-  .generated-post {
-    background: var(--bg); border-radius: 12px; padding: 16px;
-    margin-top: 16px; font-size: .875rem; line-height: 1.6;
-    border: 1.5px solid var(--border); white-space: pre-wrap;
-    direction: rtl;
-  }
-  .post-actions { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+/* ── BRAND PANEL ── */
+.brand-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+.brand-card { background: var(--warm); border-radius: 12px; padding: 14px; }
+.brand-card .bc-label { font-size: .65rem; text-transform: uppercase; letter-spacing: .8px; font-weight: 700; color: var(--gold-dark); margin-bottom: 6px; }
+.brand-card .bc-val { font-size: .82rem; line-height: 1.6; }
+.phrase-row {
+  background: white; padding: 9px 14px; border-radius: 10px;
+  font-size: .8rem; border-right: 3px solid var(--gold);
+  cursor: pointer; margin-bottom: 6px; transition: background .15s;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.phrase-row:hover { background: var(--gold-light); }
 
-  /* ===== STYLE REFERENCE ===== */
-  .style-ref-intro { color: var(--text-muted); font-size: .875rem; margin-bottom: 16px; }
-  .style-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-  .style-post {
-    background: var(--surface); border-radius: 10px; overflow: hidden;
-    border: 1.5px solid var(--border);
-  }
-  .style-post .sp-thumb {
-    aspect-ratio: 1; background: linear-gradient(135deg, #f0e9e0, #e0d5c8);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.5rem;
-  }
-  .style-post .sp-caption { padding: 8px; font-size: .7rem; color: var(--text-muted); }
-  .ig-link {
-    display: inline-flex; align-items: center; gap: 6px;
-    color: var(--accent-dark); font-weight: 700; font-size: .875rem;
-    text-decoration: none; margin-bottom: 16px;
-  }
-  .ig-link:hover { text-decoration: underline; }
+/* ── FEED TABS ── */
+.feed-tabs { display: flex; gap: 6px; margin-bottom: 20px; }
+.feed-tab {
+  padding: 7px 16px; border-radius: 10px; font-size: .82rem; font-weight: 700;
+  cursor: pointer; border: 1.5px solid var(--border);
+  background: var(--surface); color: var(--muted);
+  transition: all .15s; font-family: inherit;
+}
+.feed-tab.active { background: var(--gold); border-color: var(--gold); color: white; }
 
-  .tag { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: .72rem; font-weight: 700; }
-  .tag-organic { background: #e8f5e9; color: var(--tag-organic); }
-  .tag-paid { background: #e8eaf6; color: var(--tag-paid); }
+/* ── GROW PAGE ── */
+.stat-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 20px; }
+.stat-card {
+  background: var(--surface); border-radius: 14px; padding: 18px;
+  border: 1.5px solid var(--border); text-align: center;
+}
+.stat-card .sc-num { font-size: 1.8rem; font-weight: 800; color: var(--gold-dark); }
+.stat-card .sc-label { font-size: .72rem; color: var(--muted); font-weight: 600; margin-top: 3px; }
+.stat-card .sc-sub { font-size: .65rem; color: var(--muted); margin-top: 2px; }
+.tip-card {
+  background: var(--surface); border-radius: 14px; padding: 16px 18px;
+  border: 1.5px solid var(--border); margin-bottom: 10px; display: flex; gap: 14px; align-items: flex-start;
+}
+.tip-icon { font-size: 1.4rem; flex-shrink: 0; }
+.tip-title { font-size: .875rem; font-weight: 700; margin-bottom: 3px; }
+.tip-body { font-size: .78rem; color: var(--muted); line-height: 1.5; }
+.tag-bank { display: flex; flex-wrap: wrap; gap: 6px; }
+.tag-item { padding: 4px 10px; border-radius: 8px; font-size: .72rem; font-weight: 600; background: var(--warm); border: 1px solid var(--border); cursor: pointer; transition: all .15s; }
+.tag-item:hover { background: var(--gold-light); border-color: var(--gold); color: var(--gold-dark); }
 
-  /* ===== HISTORY ===== */
-  .history-list { display: flex; flex-direction: column; gap: 10px; }
-  .history-item {
-    background: var(--surface); border-radius: 12px; padding: 14px 16px;
-    border: 1.5px solid var(--border);
-  }
-  .history-item .hi-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
-  .history-item .hi-title { font-weight: 700; font-size: .875rem; flex: 1; }
-  .history-item .hi-date { font-size: .72rem; color: var(--text-muted); }
-  .history-item .hi-body { font-size: .825rem; color: var(--text-muted); line-height: 1.5; direction: rtl; }
-  .history-item .hi-actions { margin-top: 8px; display: flex; gap: 6px; }
+/* ── IN-APP EDITOR ── */
+.editor-overlay {
+  position: fixed; inset: 0; z-index: 500;
+  display: none; flex-direction: column;
+  background: var(--editor-bg);
+}
+.editor-overlay.show { display: flex; }
+.editor-topbar {
+  height: 54px; background: rgba(20,18,16,.95); backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--editor-border);
+  display: flex; align-items: center; padding: 0 16px; gap: 10px; flex-shrink: 0;
+}
+.editor-topbar .et-title { font-size: .9rem; font-weight: 700; color: var(--editor-text); flex: 1; }
+.editor-body { flex: 1; display: flex; overflow: hidden; }
+.editor-canvas-area {
+  flex: 1; background: #0e0c0a; display: flex;
+  align-items: center; justify-content: center; overflow: hidden;
+  position: relative;
+}
+#editorCanvas { max-width: 100%; max-height: 100%; border-radius: 4px; }
+#editorVideo { max-width: 100%; max-height: 100%; border-radius: 4px; }
+.editor-panel {
+  width: 270px; background: var(--editor-panel); overflow-y: auto;
+  border-right: 1px solid var(--editor-border);
+  padding: 0;
+}
+.ep-section { padding: 14px 16px; border-bottom: 1px solid var(--editor-border); }
+.ep-label { font-size: .62rem; text-transform: uppercase; letter-spacing: 1px; color: var(--editor-muted); font-weight: 700; margin-bottom: 10px; }
+.ep-presets { display: flex; flex-wrap: wrap; gap: 5px; }
+.ep-preset {
+  padding: 5px 10px; border-radius: 8px; font-size: .72rem; font-weight: 700;
+  cursor: pointer; border: 1px solid var(--editor-border);
+  background: transparent; color: #aaa; transition: all .15s; font-family: inherit;
+}
+.ep-preset.active, .ep-preset:hover { border-color: var(--gold); color: var(--gold); background: rgba(200,164,90,.1); }
+.ep-slider-wrap { margin-bottom: 10px; }
+.ep-sl-top { display: flex; justify-content: space-between; font-size: .7rem; color: #777; margin-bottom: 4px; }
+.ep-slider {
+  width: 100%; -webkit-appearance: none; height: 3px;
+  background: var(--editor-border); border-radius: 2px; outline: none; cursor: pointer;
+}
+.ep-slider::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 14px; height: 14px;
+  border-radius: 50%; background: var(--gold); cursor: pointer;
+  box-shadow: 0 0 0 3px rgba(200,164,90,.25);
+}
+.ep-tools { display: flex; gap: 6px; flex-wrap: wrap; }
+.ep-tool {
+  flex: 1; min-width: 50px; padding: 8px 4px; text-align: center;
+  border-radius: 10px; cursor: pointer; background: rgba(255,255,255,.04);
+  border: 1px solid var(--editor-border); font-size: .72rem; color: #bbb;
+  transition: all .15s; font-family: inherit;
+}
+.ep-tool .ti { font-size: 1.1rem; display: block; margin-bottom: 2px; }
+.ep-tool:hover { border-color: var(--gold); color: var(--gold); background: rgba(200,164,90,.08); }
+.ep-input {
+  width: 100%; padding: 8px 12px; border-radius: 8px;
+  background: rgba(255,255,255,.06); border: 1px solid var(--editor-border);
+  color: var(--editor-text); font-family: inherit; font-size: .82rem;
+}
+.ep-input:focus { outline: none; border-color: var(--gold); }
+.ep-mini-tabs { display: flex; gap: 4px; margin-bottom: 8px; }
+.ep-mini-tab {
+  flex: 1; padding: 5px; text-align: center; font-size: .7rem; font-weight: 700;
+  border-radius: 6px; cursor: pointer; color: #888;
+  background: transparent; border: 1px solid var(--editor-border);
+  transition: all .15s; font-family: inherit;
+}
+.ep-mini-tab.active { background: rgba(200,164,90,.15); border-color: var(--gold); color: var(--gold); }
+.ep-colors { display: flex; gap: 6px; margin-top: 8px; }
+.ep-color { width: 20px; height: 20px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; transition: border .15s; }
+.ep-color.active { border-color: white; }
+.trim-wrap { }
+.trim-bar { height: 28px; background: rgba(255,255,255,.06); border-radius: 8px; position: relative; overflow: hidden; }
+.trim-range { position: absolute; top: 0; height: 100%; background: rgba(200,164,90,.3); }
+.trim-handles { display: flex; gap: 8px; margin-top: 8px; }
+.trim-handles input { flex: 1; }
+.trim-time { font-size: .7rem; color: var(--editor-muted); text-align: center; margin-top: 5px; }
+.editor-btn {
+  padding: 8px 14px; border-radius: 8px; font-size: .78rem; font-weight: 700;
+  cursor: pointer; border: none; transition: all .15s; font-family: inherit;
+}
+.editor-btn-ghost { background: rgba(255,255,255,.06); color: #bbb; border: 1px solid var(--editor-border); }
+.editor-btn-ghost:hover { border-color: var(--gold); color: var(--gold); }
+.editor-btn-gold { background: var(--gold); color: white; }
+.editor-btn-gold:hover { background: var(--gold-dark); }
+.editor-btn-sm { padding: 5px 10px; font-size: .72rem; }
 
-  /* Notification */
-  .notif {
-    position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
-    background: var(--text); color: white; padding: 10px 20px;
-    border-radius: 50px; font-size: .825rem; z-index: 500;
-    opacity: 0; transition: opacity .3s; pointer-events: none;
-  }
-  .notif.show { opacity: 1; }
+/* ── SOCIAL FEED PANEL ── */
+.ig-profile { display: flex; align-items: center; gap: 14px; padding: 16px; background: var(--warm); border-radius: 14px; margin-bottom: 16px; }
+.ig-avatar { width: 52px; height: 52px; border-radius: 50%; background: linear-gradient(135deg,#f58529,#dd2a7b,#8134af); display: flex; align-items: center; justify-content: center; font-size: 1.3rem; color: white; font-weight: 800; flex-shrink: 0; }
+.ig-name { font-weight: 800; font-size: .95rem; }
+.ig-handle { font-size: .75rem; color: var(--muted); }
+.ref-links { display: flex; flex-direction: column; gap: 6px; }
+.ref-link {
+  display: flex; align-items: center; gap: 10px; padding: 10px 14px;
+  background: var(--surface); border-radius: 10px; border: 1.5px solid var(--border);
+  text-decoration: none; color: var(--text); transition: all .15s;
+}
+.ref-link:hover { border-color: var(--gold); background: var(--gold-light); }
+.ref-link .rl-icon { font-size: 1.1rem; }
+.ref-link .rl-text { font-size: .82rem; font-weight: 600; }
+.ref-link .rl-url { font-size: .7rem; color: var(--muted); margin-right: auto; }
 
-  /* Loading spinner */
-  .spinner { display: inline-block; width: 20px; height: 20px; border: 2px solid rgba(255,255,255,.3); border-radius: 50%; border-top-color: white; animation: spin .6s linear infinite; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  /* Responsive */
-  @media (max-width: 600px) {
-    main { padding: 16px; }
-    .tools-grid { grid-template-columns: 1fr; }
-    .style-grid { grid-template-columns: repeat(2, 1fr); }
-    header { padding: 0 16px; }
-  }
+/* misc */
+.spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,.3); border-radius: 50%; border-top-color: white; animation: spin .6s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.divider { height: 1px; background: var(--border); margin: 16px 0; }
+.section-title { font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; color: var(--muted); margin-bottom: 12px; }
 </style>
 </head>
 <body>
 
-<header>
-  <div class="logo">ליבנת סטודיו <span>| ניהול תוכן</span></div>
-  <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">+ העלאה</button>
-</header>
-
-<main>
-  <!-- Upload Zone -->
-  <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
-    <div class="icon">📁</div>
-    <h3>גרור תמונות או סרטונים לכאן</h3>
-    <p>תומך ב־JPG, PNG, MP4, MOV, HEIC · לחץ לבחירה</p>
+<!-- ══ SIDEBAR ══ -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-name">ליבנת סטודיו</div>
+    <div class="logo-sub">ניהול תוכן ועיצוב</div>
+  </div>
+  <div class="sidebar-nav">
+    <button class="nav-item active" onclick="showPage('gallery',this)">
+      <span class="ni">🖼️</span> גלריה
+    </button>
+    <button class="nav-item" onclick="showPage('posts',this)">
+      <span class="ni">✍️</span> פוסטים
+    </button>
+    <div class="nav-divider"></div>
+    <button class="nav-item" onclick="showPage('style',this)">
+      <span class="ni">💡</span> סגנון מותג
+    </button>
+    <button class="nav-item" onclick="showPage('grow',this)">
+      <span class="ni">🚀</span> קידום
+    </button>
+  </div>
+  <div class="sidebar-upload">
+    <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+      + העלאה
+    </button>
     <input type="file" id="fileInput" multiple accept="image/*,video/*" onchange="handleFiles(this.files)">
   </div>
+</nav>
 
-  <!-- Tabs -->
-  <div class="tabs">
-    <button class="tab active" onclick="switchTab('gallery', this)">🖼 גלריה</button>
-    <button class="tab" onclick="switchTab('posts', this)">✍️ פוסטים</button>
-    <button class="tab" onclick="switchTab('style', this)">💡 סגנון</button>
-    <button class="tab" onclick="switchTab('grow', this)">🚀 קידום</button>
-  </div>
+<!-- ══ MAIN ══ -->
+<div class="main">
 
-  <!-- Gallery Tab -->
-  <div id="tab-gallery" class="tab-content active">
-    <div class="projects-header">
-      <h2>מדיה (<span id="mediaCount">0</span>)</h2>
-      <div style="display:flex;gap:8px;">
+  <!-- ── GALLERY PAGE ── -->
+  <div id="page-gallery" class="page active">
+    <div class="topbar">
+      <h1>גלריה <span id="mediaCountBadge" style="font-size:.75rem;color:var(--muted);font-weight:400;"></span></h1>
+      <div class="topbar-actions">
+        <div class="search-bar"><span>🔍</span><input type="text" placeholder="חפש קבצים..." oninput="filterMedia(this.value)"></div>
         <button class="btn btn-ghost btn-sm" onclick="selectAll()">בחר הכל</button>
-        <button class="btn btn-ghost btn-sm" onclick="clearSelection()">בטל בחירה</button>
       </div>
     </div>
-    <div class="grid" id="mediaGrid">
-      <div class="empty-state" id="emptyState" style="grid-column:1/-1">
-        <div class="big">📸</div>
-        <p>עדיין לא הועלו קבצים</p>
-        <p style="font-size:.75rem;margin-top:4px;">העלה תמונות וסרטונים מהפרויקטים שלך</p>
+    <div style="padding:28px;">
+      <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+        <div class="dz-icon">📁</div>
+        <h3>גרור תמונות וסרטונים לכאן</h3>
+        <p>JPG · PNG · MP4 · MOV · HEIC</p>
+      </div>
+      <div class="section-header">
+        <h2>קבצים <span id="mediaCount" style="color:var(--muted);font-weight:400;font-size:.85rem;"></span></h2>
+        <div class="sh-right">
+          <button class="btn btn-ghost btn-sm" onclick="clearSelection()" style="display:none;" id="clearSelBtn">✕ בטל בחירה</button>
+        </div>
+      </div>
+      <div class="media-grid" id="mediaGrid">
+        <div id="emptyState" class="empty" style="column-span:all;grid-column:1/-1;">
+          <div class="ei">📸</div>
+          <h3>עוד לא הועלו קבצים</h3>
+          <p>העלה תמונות וסרטונים מהפרויקטים שלך</p>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- Posts Tab -->
-  <div id="tab-posts" class="tab-content">
-    <div class="projects-header">
-      <h2>היסטוריית פוסטים</h2>
+  <!-- ── POSTS PAGE ── -->
+  <div id="page-posts" class="page">
+    <div class="topbar">
+      <h1>פוסטים</h1>
       <button class="btn btn-primary btn-sm" onclick="openPostModal(null)">+ פוסט חדש</button>
     </div>
-    <div id="historyList" class="history-list">
-      <div class="empty-state">
-        <div class="big">✍️</div>
-        <p>עוד לא נכתבו פוסטים</p>
-        <p style="font-size:.75rem;margin-top:4px;">לחץ "פוסט חדש" או בחר מדיה מהגלריה</p>
+    <div style="padding:28px;">
+      <div id="historyList" class="history-list">
+        <div class="empty"><div class="ei">✍️</div><h3>עוד לא נכתבו פוסטים</h3><p>לחץ "פוסט חדש" למעלה</p></div>
       </div>
     </div>
   </div>
 
-  <!-- Style Reference Tab -->
-  <div id="tab-style" class="tab-content">
-
-    <!-- Social Feed Tabs -->
-    <div style="display:flex;gap:8px;margin-bottom:20px;">
-      <button class="btn btn-primary" onclick="showFeed('fb',this)" id="fbBtn">📘 פייסבוק</button>
-      <button class="btn btn-ghost" onclick="showFeed('ig',this)" id="igBtn">📸 אינסטגרם</button>
-      <button class="btn btn-ghost" onclick="showFeed('brand',this)" id="brandBtn">📌 קו מותג</button>
-    </div>
-
-    <!-- Facebook Feed -->
-    <div id="feed-fb">
-      <p class="style-ref-intro" style="margin-bottom:14px;">פיד פייסבוק חי של ליבנת — ראה פוסטים אחרונים לפני שכותב פוסט חדש.</p>
-      <div style="display:flex;justify-content:center;">
-        <iframe
-          src="https://www.facebook.com/plugins/page.php?href=https%3A%2F%2Fwww.facebook.com%2Fprofile.php%3Fid%3D61565649749326&tabs=timeline&width=500&height=600&small_header=true&adapt_container_width=true&hide_cover=false&show_facepile=false"
-          width="500" height="600"
-          style="border:none;overflow:hidden;border-radius:12px;max-width:100%;width:100%;"
-          scrolling="no" frameborder="0" allowfullscreen="true"
-          allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share">
-        </iframe>
+  <!-- ── STYLE PAGE ── -->
+  <div id="page-style" class="page">
+    <div class="topbar"><h1>סגנון מותג</h1></div>
+    <div style="padding:28px;">
+      <div class="feed-tabs">
+        <button class="feed-tab active" onclick="showFeed('ig',this)">📸 אינסטגרם</button>
+        <button class="feed-tab" onclick="showFeed('fb',this)">📘 פייסבוק</button>
+        <button class="feed-tab" onclick="showFeed('brand',this)">📌 קו מותג</button>
       </div>
-      <p style="font-size:.72rem;color:var(--text-muted);text-align:center;margin-top:10px;">
-        לא רואה את הפיד? <a href="https://www.facebook.com/profile.php?id=61565649749326" target="_blank" style="color:var(--accent-dark);">לחץ לפתוח בפייסבוק</a>
-      </p>
-    </div>
 
-    <!-- Instagram Feed -->
-    <div id="feed-ig" style="display:none;">
-      <p class="style-ref-intro" style="margin-bottom:14px;">לחץ כדי לפתוח את עמוד האינסטגרם של ליבנת — ראה פוסטים ורילס אחרונים.</p>
-      <div style="background:var(--surface);border-radius:14px;border:1.5px solid var(--border);overflow:hidden;">
-        <!-- Instagram Profile Header Mockup -->
-        <div style="padding:20px;display:flex;align-items:center;gap:16px;border-bottom:1px solid var(--border);">
-          <div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#f58529,#dd2a7b,#8134af);display:flex;align-items:center;justify-content:center;font-size:1.4rem;color:white;">L</div>
+      <div id="feed-ig">
+        <div class="ig-profile">
+          <div class="ig-avatar">L</div>
           <div>
-            <div style="font-weight:700;font-size:.95rem;">livnat_benizri</div>
-            <div style="font-size:.78rem;color:var(--text-muted);">מעצבת פנים | עיצוב + שיפוצים</div>
+            <div class="ig-name">ליבנת בניזרי</div>
+            <div class="ig-handle">@livnat_benizri · מעצבת פנים</div>
           </div>
-          <a href="https://www.instagram.com/livnat_benizri/" target="_blank" class="btn btn-primary btn-sm" style="margin-right:auto;">פתח עמוד ←</a>
+          <a href="https://www.instagram.com/livnat_benizri/" target="_blank" class="btn btn-ghost btn-sm" style="margin-right:auto;">פתח ↗</a>
         </div>
-        <div style="padding:16px;">
-          <p style="font-size:.825rem;color:var(--text-muted);margin-bottom:12px;">פוסטים שליבנת אוהבת (לסגנון):</p>
-          <div style="display:flex;flex-direction:column;gap:8px;">
-            <a href="https://www.instagram.com/reel/DGGmnYgo7BS/" target="_blank" style="display:flex;align-items:center;gap:8px;padding:8px;background:var(--bg);border-radius:8px;text-decoration:none;color:var(--text);">
-              <span style="font-size:1.2rem;">▶️</span>
-              <span style="font-size:.8rem;">רילס השראה — סגנון עיצוב</span>
-              <span style="margin-right:auto;font-size:.72rem;color:var(--text-muted);">instagram.com ↗</span>
-            </a>
-            <a href="https://www.instagram.com/p/DGdbKCnNYZ2/" target="_blank" style="display:flex;align-items:center;gap:8px;padding:8px;background:var(--bg);border-radius:8px;text-decoration:none;color:var(--text);">
-              <span style="font-size:1.2rem;">🖼️</span>
-              <span style="font-size:.8rem;">פוסט תמונה — השראת עיצוב</span>
-              <span style="margin-right:auto;font-size:.72rem;color:var(--text-muted);">instagram.com ↗</span>
-            </a>
-            <a href="https://www.instagram.com/p/DFu3pNmiPGy/" target="_blank" style="display:flex;align-items:center;gap=8px;padding:8px;background:var(--bg);border-radius:8px;text-decoration:none;color:var(--text);">
-              <span style="font-size:1.2rem;">🏠</span>
-              <span style="font-size:.8rem;">פרויקט עיצוב פנים</span>
-              <span style="margin-right:auto;font-size:.72rem;color:var(--text-muted);">instagram.com ↗</span>
-            </a>
-            <a href="https://www.instagram.com/p/DGcCHldtgU1/" target="_blank" style="display:flex;align-items:center;gap:8px;padding:8px;background:var(--bg);border-radius:8px;text-decoration:none;color:var(--text);">
-              <span style="font-size:1.2rem;">✨</span>
-              <span style="font-size:.8rem;">פוסט נוסף לסגנון</span>
-              <span style="margin-right:auto;font-size:.72rem;color:var(--text-muted);">instagram.com ↗</span>
-            </a>
-          </div>
+        <div class="ref-links">
+          <a class="ref-link" href="https://www.instagram.com/reel/DGGmnYgo7BS/" target="_blank">
+            <span class="rl-icon">▶️</span><span class="rl-text">רילס השראה</span><span class="rl-url">instagram.com ↗</span>
+          </a>
+          <a class="ref-link" href="https://www.instagram.com/p/DGdbKCnNYZ2/" target="_blank">
+            <span class="rl-icon">🖼️</span><span class="rl-text">פוסט עיצוב פנים</span><span class="rl-url">instagram.com ↗</span>
+          </a>
+          <a class="ref-link" href="https://www.instagram.com/p/DFu3pNmiPGy/" target="_blank">
+            <span class="rl-icon">🏠</span><span class="rl-text">פרויקט שלם</span><span class="rl-url">instagram.com ↗</span>
+          </a>
         </div>
+      </div>
+
+      <div id="feed-fb" style="display:none;">
+        <div style="display:flex;justify-content:center;">
+          <iframe src="https://www.facebook.com/plugins/page.php?href=https%3A%2F%2Fwww.facebook.com%2Fprofile.php%3Fid%3D61565649749326&tabs=timeline&width=500&height=550&small_header=true&adapt_container_width=true&hide_cover=false&show_facepile=false"
+            width="500" height="550" style="border:none;border-radius:14px;overflow:hidden;max-width:100%;width:100%;" scrolling="no" frameborder="0" allowfullscreen></iframe>
+        </div>
+        <p style="font-size:.72rem;color:var(--muted);text-align:center;margin-top:10px;">לא רואה? <a href="https://www.facebook.com/profile.php?id=61565649749326" target="_blank" style="color:var(--gold-dark);">פתח בפייסבוק</a></p>
+      </div>
+
+      <div id="feed-brand" style="display:none;">
+        <div class="brand-grid">
+          <div class="brand-card"><div class="bc-label">טון כתיבה</div><div class="bc-val">חמים · אישי · מספרת סיפור<br>לא מכירתי</div></div>
+          <div class="brand-card"><div class="bc-label">ייחוד</div><div class="bc-val">ידע בחומר שחור<br>10+ שנות שיפוצים</div></div>
+          <div class="brand-card"><div class="bc-label">קהל יעד</div><div class="bc-val">משפחות בשיפוץ<br>דירה חדשה</div></div>
+          <div class="brand-card"><div class="bc-label">CTA תמיד</div><div class="bc-val">שלחו הודעה<br>אל מספר טלפון!</div></div>
+        </div>
+        <div class="section-title">משפטי מפתח — לחץ להעתקה</div>
+        <div onclick="copyPhrase(this)" class="phrase-row">"אני לא רק מעצבת — אני מחזיקה את כל הפרויקט" <span style="color:var(--muted);">📋</span></div>
+        <div onclick="copyPhrase(this)" class="phrase-row">"כשיש תכנון נכון, הכול מתחבר ומרגיש בול" <span style="color:var(--muted);">📋</span></div>
+        <div onclick="copyPhrase(this)" class="phrase-row">"בית מעוצב זה לא מותרות — זה נוחות שמרגישים כל יום" <span style="color:var(--muted);">📋</span></div>
+        <div onclick="copyPhrase(this)" class="phrase-row">"מהתכנון על הנייר ועד הפרט האחרון בשטח" <span style="color:var(--muted);">📋</span></div>
+        <div onclick="copyPhrase(this)" class="phrase-row">"פחדים מקבלנים? בדיוק בשביל זה אני כאן" <span style="color:var(--muted);">📋</span></div>
       </div>
     </div>
-
-    <!-- Brand Guide -->
-    <div id="feed-brand" style="display:none;">
-      <!-- Identity -->
-      <div style="background:var(--surface);border-radius:12px;border:1.5px solid var(--border);padding:20px;margin-bottom:14px;">
-        <p style="font-size:.95rem;font-weight:700;margin-bottom:14px;">👤 פרופיל המותג — ליבנת בניזרי</p>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
-          <div style="background:var(--bg);border-radius:10px;padding:12px;">
-            <p style="font-size:.68rem;font-weight:700;color:var(--accent-dark);margin-bottom:5px;text-transform:uppercase;">זהות</p>
-            <p style="font-size:.8rem;line-height:1.6;">מעצבת פנים + שיפוצים<br>10+ שנות ניסיון<br>נשואה, אמא ל-3</p>
-          </div>
-          <div style="background:var(--bg);border-radius:10px;padding:12px;">
-            <p style="font-size:.68rem;font-weight:700;color:var(--accent-dark);margin-bottom:5px;text-transform:uppercase;">ייחוד מוחלט</p>
-            <p style="font-size:.8rem;line-height:1.6;">ידע בחומר השחור בבנייה — לא רק מעצבת, גם פיקוח בשטח ממשי</p>
-          </div>
-          <div style="background:var(--bg);border-radius:10px;padding:12px;">
-            <p style="font-size:.68rem;font-weight:700;color:var(--accent-dark);margin-bottom:5px;text-transform:uppercase;">קהל יעד</p>
-            <p style="font-size:.8rem;line-height:1.6;">משפחות לפני שיפוץ<br>בעלי דירה חדשה<br>מי שפוחד מקבלנים</p>
-          </div>
-          <div style="background:var(--bg);border-radius:10px;padding:12px;">
-            <p style="font-size:.68rem;font-weight:700;color:var(--accent-dark);margin-bottom:5px;text-transform:uppercase;">שירותים</p>
-            <p style="font-size:.8rem;line-height:1.6;">ליווי מלא<br>ייעוץ קלאסי<br>ייעוץ פרימיום (תוכניות לקבלן)</p>
-          </div>
-        </div>
-
-        <!-- Tone rules -->
-        <p style="font-size:.8rem;font-weight:700;margin-bottom:8px;color:var(--text-muted);">🎙️ כללי טון — ממה שראינו בפוסטים האמיתיים</p>
-        <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px;">
-          <div style="display:flex;align-items:flex-start;gap:8px;font-size:.8rem;background:var(--bg);padding:8px 10px;border-radius:8px;">
-            <span style="color:var(--tag-organic);font-weight:700;flex-shrink:0;">✓</span>
-            <span>מספרת סיפור בגוף ראשון — "הגעתי, ישבתי עם הקבלן, וידאגתי שהכול יישב בול"</span>
-          </div>
-          <div style="display:flex;align-items:flex-start;gap:8px;font-size:.8rem;background:var(--bg);padding:8px 10px;border-radius:8px;">
-            <span style="color:var(--tag-organic);font-weight:700;flex-shrink:0;">✓</span>
-            <span>CTA תמיד רך — "כתבו לי הודעה" / "שלחו לי מסר" — לעולם לא מספר טלפון בפוסט</span>
-          </div>
-          <div style="display:flex;align-items:flex-start;gap:8px;font-size:.8rem;background:var(--bg);padding:8px 10px;border-radius:8px;">
-            <span style="color:var(--tag-organic);font-weight:700;flex-shrink:0;">✓</span>
-            <span>משתמשת בכאב של הקהל — פחד מקבלנים, טעויות יקרות, שיפוץ מבלבל</span>
-          </div>
-          <div style="display:flex;align-items:flex-start;gap:8px;font-size:.8rem;background:var(--bg);padding:8px 10px;border-radius:8px;">
-            <span style="color:var(--tag-organic);font-weight:700;flex-shrink:0;">✓</span>
-            <span>אמוג'י — כן, אבל לא יותר מ-3 בפוסט. 😊 🤍 ✨ 🙏 🔥 — הכי נפוצים</span>
-          </div>
-          <div style="display:flex;align-items:flex-start;gap:8px;font-size:.8rem;background:#fff0f0;padding:8px 10px;border-radius:8px;">
-            <span style="color:var(--danger);font-weight:700;flex-shrink:0;">✗</span>
-            <span>לא כותבת מחירים בפוסטים</span>
-          </div>
-          <div style="display:flex;align-items:flex-start;gap:8px;font-size:.8rem;background:#fff0f0;padding:8px 10px;border-radius:8px;">
-            <span style="color:var(--danger);font-weight:700;flex-shrink:0;">✗</span>
-            <span>לא מספר טלפון — רק WhatsApp בביו</span>
-          </div>
-        </div>
-
-        <!-- Power phrases -->
-        <p style="font-size:.8rem;font-weight:700;margin-bottom:8px;color:var(--text-muted);">💬 משפטי מפתח שעובדים לה</p>
-        <div style="display:flex;flex-direction:column;gap:6px;">
-          <div style="background:white;padding:8px 12px;border-radius:8px;font-size:.8rem;border-right:3px solid var(--accent);cursor:pointer;" onclick="copyPhrase(this)">"אני לא רק מעצבת — אני מחזיקה את כל הפרויקט" 📋</div>
-          <div style="background:white;padding:8px 12px;border-radius:8px;font-size:.8rem;border-right:3px solid var(--accent);cursor:pointer;" onclick="copyPhrase(this)">"כשיש תכנון נכון — האור, הצבע, הריהוט — הכול מתחבר ומרגיש בול" 📋</div>
-          <div style="background:white;padding:8px 12px;border-radius:8px;font-size:.8rem;border-right:3px solid var(--accent);cursor:pointer;" onclick="copyPhrase(this)">"בית מעוצב זה לא מותרות — זה נוחות שמרגישים כל יום" 📋</div>
-          <div style="background:white;padding:8px 12px;border-radius:8px;font-size:.8rem;border-right:3px solid var(--accent);cursor:pointer;" onclick="copyPhrase(this)">"פחדים מקבלנים, מחומרים, מטעויות יקרות? בדיוק בשביל זה אני כאן" 📋</div>
-          <div style="background:white;padding:8px 12px;border-radius:8px;font-size:.8rem;border-right:3px solid var(--accent);cursor:pointer;" onclick="copyPhrase(this)">"מהתכנון על הנייר ועד הפרט האחרון בשטח — אני שם" 📋</div>
-        </div>
-        <p style="font-size:.68rem;color:var(--text-muted);margin-top:8px;">לחץ על משפט להעתקה</p>
-      </div>
-    </div>
-
-  </div>
-</main>
-
-  <!-- Grow Tab -->
-  <div id="tab-grow" class="tab-content">
-
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px;">
-      <!-- Posting frequency -->
-      <div style="background:var(--surface);border-radius:14px;border:1.5px solid var(--border);padding:18px;grid-column:1/-1;">
-        <p style="font-weight:700;font-size:.95rem;margin-bottom:4px;">📅 כמה פוסטים לפרסם?</p>
-        <p style="font-size:.78rem;color:var(--text-muted);margin-bottom:12px;">עבור עיצוב פנים — עקביות חשובה יותר מכמות</p>
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
-          <div style="background:#e8f5e9;border-radius:10px;padding:12px;text-align:center;">
-            <p style="font-size:1.3rem;font-weight:700;color:var(--tag-organic);">3–4</p>
-            <p style="font-size:.72rem;color:var(--tag-organic);font-weight:600;">פוסטים / שבוע</p>
-            <p style="font-size:.7rem;color:var(--text-muted);margin-top:4px;">אינסטגרם + פייסבוק</p>
-          </div>
-          <div style="background:#e3f2fd;border-radius:10px;padding:12px;text-align:center;">
-            <p style="font-size:1.3rem;font-weight:700;color:#1565c0;">2–3</p>
-            <p style="font-size:.72rem;color:#1565c0;font-weight:600;">רילס / שבוע</p>
-            <p style="font-size:.7rem;color:var(--text-muted);margin-top:4px;">הכי חשוב לצמיחה</p>
-          </div>
-          <div style="background:#fff8e1;border-radius:10px;padding:12px;text-align:center;">
-            <p style="font-size:1.3rem;font-weight:700;color:#e65100;">1</p>
-            <p style="font-size:.72rem;color:#e65100;font-weight:600;">סטורי ביום</p>
-            <p style="font-size:.7rem;color:var(--text-muted);margin-top:4px;">שומר על נוכחות</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Content mix -->
-      <div style="background:var(--surface);border-radius:14px;border:1.5px solid var(--border);padding:18px;">
-        <p style="font-weight:700;font-size:.9rem;margin-bottom:12px;">🎯 מה לפרסם — תמהיל מומלץ</p>
-        <div style="display:flex;flex-direction:column;gap:8px;">
-          <div style="display:flex;align-items:center;gap:10px;">
-            <div style="width:36px;height-36px;background:#e8f5e9;border-radius:8px;padding:6px;font-size:1rem;text-align:center;">🏠</div>
-            <div>
-              <p style="font-size:.8rem;font-weight:700;">40% — פרויקטים גמורים</p>
-              <p style="font-size:.7rem;color:var(--text-muted);">תמונות/רילס לפני-אחרי</p>
-            </div>
-          </div>
-          <div style="display:flex;align-items:center;gap:10px;">
-            <div style="background:#e3f2fd;border-radius:8px;padding:6px;font-size:1rem;text-align:center;">🎬</div>
-            <div>
-              <p style="font-size:.8rem;font-weight:700;">30% — תהליך + סיור בבית</p>
-              <p style="font-size:.7rem;color:var(--text-muted);">רילס של בנייה, בחירת חומרים, שטח</p>
-            </div>
-          </div>
-          <div style="display:flex;align-items:center;gap:10px;">
-            <div style="background:#f3e5f5;border-radius:8px;padding:6px;font-size:1rem;text-align:center;">💬</div>
-            <div>
-              <p style="font-size:.8rem;font-weight:700;">20% — טיפים מקצועיים</p>
-              <p style="font-size:.7rem;color:var(--text-muted);">"3 טעויות בשיפוץ שאפשר להימנע"</p>
-            </div>
-          </div>
-          <div style="display:flex;align-items:center;gap:10px;">
-            <div style="background:#fff8e1;border-radius:8px;padding:6px;font-size:1rem;text-align:center;">🙋</div>
-            <div>
-              <p style="font-size:.8rem;font-weight:700;">10% — אישי / מאחורי הקלעים</p>
-              <p style="font-size:.7rem;color:var(--text-muted);">יום בחיים, פגישה עם לקוח</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Best times -->
-      <div style="background:var(--surface);border-radius:14px;border:1.5px solid var(--border);padding:18px;">
-        <p style="font-weight:700;font-size:.9rem;margin-bottom:12px;">⏰ שעות עדיפות לפרסום</p>
-        <div style="display:flex;flex-direction:column;gap:8px;">
-          <div style="background:var(--bg);border-radius:8px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;">
-            <span style="font-size:.8rem;font-weight:700;">☕ 07:00–09:00</span>
-            <span style="font-size:.72rem;color:var(--text-muted);">בוקר — הכי טוב</span>
-          </div>
-          <div style="background:var(--bg);border-radius:8px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;">
-            <span style="font-size:.8rem;font-weight:700;">🌞 12:00–13:00</span>
-            <span style="font-size:.72rem;color:var(--text-muted);">צהריים — טוב</span>
-          </div>
-          <div style="background:var(--bg);border-radius:8px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;">
-            <span style="font-size:.8rem;font-weight:700;">🌆 19:00–21:00</span>
-            <span style="font-size:.72rem;color:var(--text-muted);">ערב — הכי טוב לרילס</span>
-          </div>
-          <div style="background:#fff0f0;border-radius:8px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;">
-            <span style="font-size:.8rem;font-weight:700;">🚫 שישי אחה"צ</span>
-            <span style="font-size:.72rem;color:var(--danger);">הימנע</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Reels tips -->
-    <div style="background:var(--surface);border-radius:14px;border:1.5px solid var(--border);padding:18px;margin-bottom:14px;">
-      <p style="font-weight:700;font-size:.95rem;margin-bottom:4px;">🎬 רילס — הכלי הכי חזק לצמיחה</p>
-      <p style="font-size:.78rem;color:var(--text-muted);margin-bottom:14px;">אינסטגרם מעדיף רילס על פני תמונות — כל רילס מגיע לאנשים חדשים</p>
-      <div style="display:flex;flex-direction:column;gap:8px;">
-        <div style="background:var(--bg);border-radius:10px;padding:12px;display:flex;gap:10px;">
-          <span style="font-size:1.1rem;flex-shrink:0;">⏱️</span>
-          <div>
-            <p style="font-size:.82rem;font-weight:700;margin-bottom:2px;">אורך אידיאלי: 15–30 שניות</p>
-            <p style="font-size:.73rem;color:var(--text-muted);">הצג תוצאה מרשימה מהר — הקהל מחליט תוך 3 שניות אם להמשיך</p>
-          </div>
-        </div>
-        <div style="background:var(--bg);border-radius:10px;padding:12px;display:flex;gap:10px;">
-          <span style="font-size:1.1rem;flex-shrink:0;">🎵</span>
-          <div>
-            <p style="font-size:.82rem;font-weight:700;margin-bottom:2px;">מוזיקה טרנדית</p>
-            <p style="font-size:.73rem;color:var(--text-muted);">השתמשי בשירים טרנדיים שאינסטגרם מציעה — מגדיל חשיפה משמעותית</p>
-          </div>
-        </div>
-        <div style="background:var(--bg);border-radius:10px;padding:12px;display:flex;gap:10px;">
-          <span style="font-size:1.1rem;flex-shrink:0;">📝</span>
-          <div>
-            <p style="font-size:.82rem;font-weight:700;margin-bottom:2px;">טקסט על הסרטון</p>
-            <p style="font-size:.73rem;color:var(--text-muted);">תמיד הוסיפי כיתוב — הרבה צופים רואים בלי קול</p>
-          </div>
-        </div>
-        <div style="background:var(--bg);border-radius:10px;padding:12px;display:flex;gap:10px;">
-          <span style="font-size:1.1rem;flex-shrink:0;">🪝</span>
-          <div>
-            <p style="font-size:.82rem;font-weight:700;margin-bottom:2px;">פתיחה חזקה — ה-Hook</p>
-            <p style="font-size:.73rem;color:var(--text-muted);">דוגמאות שעובדות: "לפני ואחרי שיפוץ 🔥" / "זו הטעות הכי נפוצה בעיצוב פנים 👇" / "כך נראה הסלון לפני..."</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Hashtag strategy -->
-    <div style="background:var(--surface);border-radius:14px;border:1.5px solid var(--border);padding:18px;margin-bottom:14px;">
-      <p style="font-weight:700;font-size:.95rem;margin-bottom:4px;">#️⃣ אסטרטגיית האשטאגים</p>
-      <p style="font-size:.78rem;color:var(--text-muted);margin-bottom:14px;">10–15 האשטאגים לפוסט — שילוב של גדולים, בינוניים וקטנים</p>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px;">
-        <div style="background:#e8f5e9;border-radius:8px;padding:10px;">
-          <p style="font-size:.68rem;font-weight:700;color:var(--tag-organic);margin-bottom:6px;">גדולים (נוכחות)</p>
-          <p style="font-size:.72rem;line-height:1.8;">#עיצובפנים<br>#מעצבתפנים<br>#שיפוץבית<br>#בית</p>
-        </div>
-        <div style="background:#e3f2fd;border-radius:8px;padding:10px;">
-          <p style="font-size:.68rem;font-weight:700;color:#1565c0;margin-bottom:6px;">בינוניים (מטרה)</p>
-          <p style="font-size:.72rem;line-height:1.8;">#עיצוב_פנים<br>#ליווי_מלא<br>#לפניואחרי<br>#בית_חלומות</p>
-        </div>
-        <div style="background:#fff8e1;border-radius:8px;padding:10px;">
-          <p style="font-size:.68rem;font-weight:700;color:#e65100;margin-bottom:6px;">קטנים (חשיפה)</p>
-          <p style="font-size:.72rem;line-height:1.8;">#ליבנת_בניזרי<br>#מעצבת_פנים_ישראל<br>#שיפוץ_[עיר]<br>#עיצוב_[חדר]</p>
-        </div>
-      </div>
-      <button class="btn btn-ghost btn-sm" onclick="copyHashtags()">📋 העתק סט האשטאגים מומלץ</button>
-    </div>
-
-    <!-- Story tips -->
-    <div style="background:var(--surface);border-radius:14px;border:1.5px solid var(--border);padding:18px;margin-bottom:14px;">
-      <p style="font-weight:700;font-size:.95rem;margin-bottom:14px;">📲 סטוריז — שומרים על קשר יומי</p>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-        <div style="background:var(--bg);border-radius:10px;padding:12px;">
-          <p style="font-size:.78rem;font-weight:700;margin-bottom:5px;">🗳️ סקרים</p>
-          <p style="font-size:.72rem;color:var(--text-muted);">"איזה סגנון מטבח אתם מעדיפים? A vs B" — מגדיל מעורבות ואלגוריתם</p>
-        </div>
-        <div style="background:var(--bg);border-radius:10px;padding:12px;">
-          <p style="font-size:.78rem;font-weight:700;margin-bottom:5px;">❓ שאלות פתוחות</p>
-          <p style="font-size:.72rem;color:var(--text-muted);">"שלחו לי תמונה של הסלון — אתן 3 טיפים חינם"</p>
-        </div>
-        <div style="background:var(--bg);border-radius:10px;padding:12px;">
-          <p style="font-size:.78rem;font-weight:700;margin-bottom:5px;">🏗️ תהליך בשטח</p>
-          <p style="font-size:.72rem;color:var(--text-muted);">צלמי 10 שניות מהשטח בכל ביקור — מראה מקצועיות ואמינות</p>
-        </div>
-        <div style="background:var(--bg);border-radius:10px;padding:12px;">
-          <p style="font-size:.78rem;font-weight:700;margin-bottom:5px;">⭐ המלצות לקוחות</p>
-          <p style="font-size:.72rem;color:var(--text-muted);">שתפי וואטסאפ/הודעות של לקוחות מרוצים (בהסכמה)</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Paid ads quick guide -->
-    <div style="background:linear-gradient(135deg,#667eea15,#764ba215);border-radius:14px;border:1.5px solid #c5cae9;padding:18px;">
-      <p style="font-weight:700;font-size:.95rem;margin-bottom:4px;">💰 מודעות ממומנות — מתי ואיך</p>
-      <p style="font-size:.78rem;color:var(--text-muted);margin-bottom:14px;">גם תקציב קטן יכול להביא לידים אם עושים נכון</p>
-      <div style="display:flex;flex-direction:column;gap:8px;">
-        <div style="background:white;border-radius:10px;padding:12px;">
-          <p style="font-size:.82rem;font-weight:700;margin-bottom:3px;">מינימום להתחיל: 30–50 ₪ ביום</p>
-          <p style="font-size:.72rem;color:var(--text-muted);">ממקד לרדיוס של 20 ק"מ סביב האזור שלך, גיל 28–55</p>
-        </div>
-        <div style="background:white;border-radius:10px;padding:12px;">
-          <p style="font-size:.82rem;font-weight:700;margin-bottom:3px;">הכי מומלץ: Boost לרילס שכבר עבד אורגנית</p>
-          <p style="font-size:.72rem;color:var(--text-muted);">פוסט שקיבל מעורבות טובה — הפוך אותו למודעה. עלות נמוכה, תוצאות גבוהות</p>
-        </div>
-        <div style="background:white;border-radius:10px;padding:12px;">
-          <p style="font-size:.82rem;font-weight:700;margin-bottom:3px;">מטרת מודעה מומלצת: "הודעות" (לא "לייקים")</p>
-          <p style="font-size:.72rem;color:var(--text-muted);">רוצים לידים — תכוונו לכפתור "שלח הודעה לוואטסאפ" עם כפתור מובנה</p>
-        </div>
-        <a class="btn btn-primary btn-sm" href="https://adsmanager.facebook.com" target="_blank" style="text-decoration:none;width:fit-content;margin-top:4px;">פתח מנהל מודעות ←</a>
-      </div>
-    </div>
-
   </div>
 
-<!-- ======== IN-APP EDITOR ======== -->
+  <!-- ── GROW PAGE ── -->
+  <div id="page-grow" class="page">
+    <div class="topbar"><h1>קידום רשתות חברתיות</h1></div>
+    <div style="padding:28px;">
+      <div class="stat-row">
+        <div class="stat-card"><div class="sc-num">3–4</div><div class="sc-label">פוסטים / שבוע</div><div class="sc-sub">אינסטגרם + פייסבוק</div></div>
+        <div class="stat-card"><div class="sc-num">2–3</div><div class="sc-label">רילס / שבוע</div><div class="sc-sub">הכי חשוב לצמיחה</div></div>
+        <div class="stat-card"><div class="sc-num">1×</div><div class="sc-label">סטורי ביום</div><div class="sc-sub">שומר על נוכחות</div></div>
+      </div>
+      <div class="section-title">שעות עדיפות לפרסום</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:20px;">
+        <div style="background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:12px;text-align:center;"><div style="font-size:1.2rem;margin-bottom:4px;">☕</div><div style="font-size:.78rem;font-weight:700;">07:00–09:00</div><div style="font-size:.68rem;color:var(--muted);">הכי טוב</div></div>
+        <div style="background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:12px;text-align:center;"><div style="font-size:1.2rem;margin-bottom:4px;">🌞</div><div style="font-size:.78rem;font-weight:700;">12:00–13:00</div><div style="font-size:.68rem;color:var(--muted);">טוב</div></div>
+        <div style="background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:12px;text-align:center;"><div style="font-size:1.2rem;margin-bottom:4px;">🌆</div><div style="font-size:.78rem;font-weight:700;">19:00–21:00</div><div style="font-size:.68rem;color:var(--muted);">רילס</div></div>
+      </div>
+      <div class="section-title">טיפים לרילס</div>
+      <div class="tip-card"><div class="tip-icon">⏱️</div><div><div class="tip-title">אורך אידיאלי: 15–30 שניות</div><div class="tip-body">3 השניות הראשונות מכריעות — פתח עם תוצאה מרשימה</div></div></div>
+      <div class="tip-card"><div class="tip-icon">🎵</div><div><div class="tip-title">מוזיקה טרנדית</div><div class="tip-body">שירים טרנדיים מגדילים חשיפה משמעותית באלגוריתם</div></div></div>
+      <div class="tip-card"><div class="tip-icon">🪝</div><div><div class="tip-title">Hook חזק בפתיחה</div><div class="tip-body">"לפני ואחרי 🔥" / "הטעות הכי נפוצה בעיצוב פנים 👇" / "כך נראה הסלון לפני..."</div></div></div>
+      <div class="divider"></div>
+      <div class="section-title">האשטאגים מומלצים — לחץ להעתקה</div>
+      <div class="tag-bank">
+        <div class="tag-item" onclick="copyTag(this)">#עיצובפנים</div>
+        <div class="tag-item" onclick="copyTag(this)">#מעצבתפנים</div>
+        <div class="tag-item" onclick="copyTag(this)">#שיפוצבית</div>
+        <div class="tag-item" onclick="copyTag(this)">#ליבנת_בניזרי</div>
+        <div class="tag-item" onclick="copyTag(this)">#עיצוב_פנים</div>
+        <div class="tag-item" onclick="copyTag(this)">#ליווי_מלא</div>
+        <div class="tag-item" onclick="copyTag(this)">#לפניואחרי</div>
+        <div class="tag-item" onclick="copyTag(this)">#בית_חלומות</div>
+        <div class="tag-item" onclick="copyTag(this)">#מעצבת_פנים_ישראל</div>
+        <div class="tag-item" onclick="copyTag(this)">#עיצוב_מודרני</div>
+        <div class="tag-item" onclick="copyTag(this)">#שיפוץ_הבית</div>
+        <div class="tag-item" onclick="copyTag(this)">#בית</div>
+      </div>
+      <button class="btn btn-ghost btn-sm" style="margin-top:12px;" onclick="copyAllTags()">📋 העתק את כולם</button>
+      <div class="divider"></div>
+      <div class="section-title">מודעות ממומנות</div>
+      <div class="tip-card"><div class="tip-icon">💰</div><div><div class="tip-title">מינימום: 30–50 ₪ ביום</div><div class="tip-body">מיקוד לרדיוס 20 ק"מ, גיל 28–55. Boost לרילס שכבר עבד אורגנית — הדרך הזולה ביותר.</div></div></div>
+      <div class="tip-card"><div class="tip-icon">🎯</div><div><div class="tip-title">מטרה: "הודעות WhatsApp"</div><div class="tip-body">לא לייקים — אלא לחיצה שמובילה ישירות להודעה. מביאה לידים אמיתיים.</div></div></div>
+      <a href="https://adsmanager.facebook.com" target="_blank" class="btn btn-primary btn-sm" style="margin-top:4px;">פתח מנהל מודעות ←</a>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<!-- ══ IN-APP EDITOR ══ -->
 <div class="editor-overlay" id="editorOverlay">
   <div class="editor-topbar">
-    <button class="btn btn-ghost btn-sm" style="color:#aaa;border-color:#444;" onclick="closeEditor()">✕ סגור</button>
-    <span class="etitle" id="editorTitle">עורך מדיה</span>
-    <button class="btn btn-sm" id="editorUndoBtn" style="background:#2a2a2a;color:#aaa;border:1.5px solid #444;" onclick="editorUndo()">↩ ביטול</button>
-    <button class="btn btn-primary btn-sm" onclick="editorDownload()" id="editorDownloadBtn">⬇ שמור והורד</button>
+    <button class="editor-btn editor-btn-ghost editor-btn-sm" onclick="closeEditor()">✕ סגור</button>
+    <span class="et-title" id="editorTitle">עורך</span>
+    <button class="editor-btn editor-btn-ghost editor-btn-sm" onclick="editorUndo()">↩</button>
+    <button class="editor-btn editor-btn-gold editor-btn-sm" onclick="editorDownload()">⬇ שמור</button>
   </div>
   <div class="editor-body">
-    <div class="editor-canvas-wrap" id="editorCanvasWrap">
-      <canvas id="editorCanvas"></canvas>
-      <video id="editorVideo" controls style="display:none;" playsinline></video>
-    </div>
-    <div class="editor-panel" id="editorPanel">
 
-      <!-- Photo panels -->
+    <!-- CONTROLS PANEL (right in RTL = left visually) -->
+    <div class="editor-panel">
+      <!-- PHOTO -->
       <div id="photoPanel">
         <div class="ep-section">
-          <div class="ep-title">פילטרים מהירים</div>
+          <div class="ep-label">פילטרים</div>
           <div class="ep-presets">
-            <div class="ep-preset active" onclick="applyPreset(this,'original')">מקורי</div>
-            <div class="ep-preset" onclick="applyPreset(this,'warm')">☀️ חם</div>
-            <div class="ep-preset" onclick="applyPreset(this,'cool')">❄️ קריר</div>
-            <div class="ep-preset" onclick="applyPreset(this,'vivid')">🌈 עז</div>
-            <div class="ep-preset" onclick="applyPreset(this,'vintage')">🎞 וינטג'</div>
-            <div class="ep-preset" onclick="applyPreset(this,'bw')">⬜ שחור-לבן</div>
-            <div class="ep-preset" onclick="applyPreset(this,'dramatic')">🎭 דרמטי</div>
-            <div class="ep-preset" onclick="applyPreset(this,'bright')">✨ בהיר</div>
+            <button class="ep-preset active" onclick="applyPreset(this,'original')">מקורי</button>
+            <button class="ep-preset" onclick="applyPreset(this,'warm')">☀️ חם</button>
+            <button class="ep-preset" onclick="applyPreset(this,'cool')">❄️ קריר</button>
+            <button class="ep-preset" onclick="applyPreset(this,'vivid')">🌈 עז</button>
+            <button class="ep-preset" onclick="applyPreset(this,'vintage')">🎞 וינטג'</button>
+            <button class="ep-preset" onclick="applyPreset(this,'bw')">⬛ B&W</button>
+            <button class="ep-preset" onclick="applyPreset(this,'dramatic')">🎭 דרמטי</button>
+            <button class="ep-preset" onclick="applyPreset(this,'bright')">✨ בהיר</button>
           </div>
         </div>
-
         <div class="ep-section">
-          <div class="ep-title">כוונון</div>
-          <div class="ep-slider-row">
-            <div class="ep-slider-label"><span>בהירות</span><span id="valBrightness">100%</span></div>
-            <input class="ep-slider" type="range" min="0" max="200" value="100" id="sBrightness" oninput="applyFilters()">
-          </div>
-          <div class="ep-slider-row">
-            <div class="ep-slider-label"><span>ניגודיות</span><span id="valContrast">100%</span></div>
-            <input class="ep-slider" type="range" min="0" max="200" value="100" id="sContrast" oninput="applyFilters()">
-          </div>
-          <div class="ep-slider-row">
-            <div class="ep-slider-label"><span>רוויה</span><span id="valSaturate">100%</span></div>
-            <input class="ep-slider" type="range" min="0" max="300" value="100" id="sSaturate" oninput="applyFilters()">
-          </div>
-          <div class="ep-slider-row">
-            <div class="ep-slider-label"><span>חמימות</span><span id="valWarm">0</span></div>
-            <input class="ep-slider" type="range" min="-50" max="50" value="0" id="sWarm" oninput="applyFilters()">
-          </div>
-          <div class="ep-slider-row">
-            <div class="ep-slider-label"><span>חדות</span><span id="valSharp">0</span></div>
-            <input class="ep-slider" type="range" min="0" max="10" value="0" id="sSharp" oninput="applyFilters()">
-          </div>
-          <div class="ep-slider-row">
-            <div class="ep-slider-label"><span>ריכוך</span><span id="valBlur">0</span></div>
-            <input class="ep-slider" type="range" min="0" max="10" value="0" id="sBlur" oninput="applyFilters()">
-          </div>
+          <div class="ep-label">כוונון</div>
+          <div class="ep-slider-wrap"><div class="ep-sl-top"><span>בהירות</span><span id="valBrightness">100%</span></div><input class="ep-slider" type="range" min="0" max="200" value="100" id="sBrightness" oninput="applyFilters()"></div>
+          <div class="ep-slider-wrap"><div class="ep-sl-top"><span>ניגודיות</span><span id="valContrast">100%</span></div><input class="ep-slider" type="range" min="0" max="200" value="100" id="sContrast" oninput="applyFilters()"></div>
+          <div class="ep-slider-wrap"><div class="ep-sl-top"><span>רוויה</span><span id="valSaturate">100%</span></div><input class="ep-slider" type="range" min="0" max="300" value="100" id="sSaturate" oninput="applyFilters()"></div>
+          <div class="ep-slider-wrap"><div class="ep-sl-top"><span>חמימות</span><span id="valWarm">0</span></div><input class="ep-slider" type="range" min="-50" max="50" value="0" id="sWarm" oninput="applyFilters()"></div>
+          <div class="ep-slider-wrap"><div class="ep-sl-top"><span>ריכוך</span><span id="valBlur">0</span></div><input class="ep-slider" type="range" min="0" max="10" value="0" id="sBlur" oninput="applyFilters()"></div>
         </div>
-
         <div class="ep-section">
-          <div class="ep-title">כלים</div>
+          <div class="ep-label">כלים</div>
           <div class="ep-tools">
-            <div class="ep-tool" onclick="editorRotate(-90)"><span class="ti">↺</span>שמאל</div>
-            <div class="ep-tool" onclick="editorRotate(90)"><span class="ti">↻</span>ימין</div>
-            <div class="ep-tool" onclick="editorFlip('h')"><span class="ti">↔</span>היפוך H</div>
-            <div class="ep-tool" onclick="editorFlip('v')"><span class="ti">↕</span>היפוך V</div>
+            <button class="ep-tool" onclick="editorRotate(-90)"><span class="ti">↺</span>שמאל</button>
+            <button class="ep-tool" onclick="editorRotate(90)"><span class="ti">↻</span>ימין</button>
+            <button class="ep-tool" onclick="editorFlip('h')"><span class="ti">↔</span>H</button>
+            <button class="ep-tool" onclick="editorFlip('v')"><span class="ti">↕</span>V</button>
           </div>
         </div>
-
         <div class="ep-section">
-          <div class="ep-title">כיתוב על התמונה</div>
-          <input class="ep-text-input" type="text" id="imgTextInput" placeholder="הוסף טקסט..." oninput="applyFilters()">
-          <div style="margin-top:8px;font-size:.72rem;color:#888;">עמדה</div>
-          <div class="ep-presets" style="margin-top:4px;">
-            <div class="ep-preset active" onclick="setTextPos(this,'bottom-center')">מרכז תחתון</div>
-            <div class="ep-preset" onclick="setTextPos(this,'top-center')">מרכז עליון</div>
-            <div class="ep-preset" onclick="setTextPos(this,'center')">מרכז</div>
+          <div class="ep-label">כיתוב</div>
+          <input class="ep-input" type="text" id="imgTextInput" placeholder="הוסף טקסט על התמונה..." oninput="applyFilters()">
+          <div class="ep-mini-tabs" style="margin-top:8px;">
+            <button class="ep-mini-tab active" onclick="setTextPos(this,'bottom-center')">תחתון</button>
+            <button class="ep-mini-tab" onclick="setTextPos(this,'top-center')">עליון</button>
+            <button class="ep-mini-tab" onclick="setTextPos(this,'center')">מרכז</button>
           </div>
-          <div class="ep-colors" style="margin-top:8px;">
-            <div class="ep-color active" style="background:white" onclick="setTextColor(this,'white')"></div>
-            <div class="ep-color" style="background:black" onclick="setTextColor(this,'black')"></div>
-            <div class="ep-color" style="background:#c9a96e" onclick="setTextColor(this,'#c9a96e')"></div>
-            <div class="ep-color" style="background:#f0e8d8" onclick="setTextColor(this,'#f0e8d8')"></div>
+          <div class="ep-colors">
+            <div class="ep-color active" style="background:white;" onclick="setTextColor(this,'white')"></div>
+            <div class="ep-color" style="background:#1e1713;" onclick="setTextColor(this,'#1e1713')"></div>
+            <div class="ep-color" style="background:#c8a45a;" onclick="setTextColor(this,'#c8a45a')"></div>
+            <div class="ep-color" style="background:#f0e9df;" onclick="setTextColor(this,'#f0e9df')"></div>
           </div>
-          <div class="ep-slider-row" style="margin-top:8px;">
-            <div class="ep-slider-label"><span>גודל טקסט</span><span id="valFontSize">32px</span></div>
-            <input class="ep-slider" type="range" min="16" max="80" value="32" id="sFontSize" oninput="applyFilters()">
-          </div>
+          <div class="ep-slider-wrap" style="margin-top:8px;"><div class="ep-sl-top"><span>גודל טקסט</span><span id="valFontSize">32px</span></div><input class="ep-slider" type="range" min="16" max="80" value="32" id="sFontSize" oninput="applyFilters()"></div>
         </div>
       </div>
 
-      <!-- Video panels -->
+      <!-- VIDEO -->
       <div id="videoPanel" style="display:none;">
         <div class="ep-section">
-          <div class="ep-title">חיתוך וידאו</div>
+          <div class="ep-label">חיתוך</div>
           <div class="trim-bar"><div class="trim-range" id="trimRange"></div></div>
           <div class="trim-handles">
             <input class="ep-slider" type="range" min="0" max="100" value="0" id="trimStart" oninput="updateTrim()">
@@ -877,448 +703,607 @@
           </div>
           <div class="trim-time" id="trimTime">0:00 – 0:00</div>
         </div>
-
         <div class="ep-section">
-          <div class="ep-title">כיתוב על הסרטון</div>
-          <input class="ep-text-input" type="text" id="vidTextInput" placeholder="טקסט על הסרטון...">
-          <div class="ep-presets" style="margin-top:8px;">
-            <div class="ep-preset active" onclick="setVidTextPos(this,'bottom')">תחתון</div>
-            <div class="ep-preset" onclick="setVidTextPos(this,'top')">עליון</div>
-            <div class="ep-preset" onclick="setVidTextPos(this,'center')">מרכז</div>
+          <div class="ep-label">כיתוב</div>
+          <input class="ep-input" type="text" id="vidTextInput" placeholder="טקסט על הסרטון...">
+          <div class="ep-mini-tabs" style="margin-top:8px;">
+            <button class="ep-mini-tab active" onclick="setVidTextPos(this,'bottom')">תחתון</button>
+            <button class="ep-mini-tab" onclick="setVidTextPos(this,'top')">עליון</button>
+            <button class="ep-mini-tab" onclick="setVidTextPos(this,'center')">מרכז</button>
           </div>
-          <div class="ep-colors" style="margin-top:8px;">
-            <div class="ep-color active" style="background:white" onclick="setVidTextColor(this,'white')"></div>
-            <div class="ep-color" style="background:black" onclick="setVidTextColor(this,'black')"></div>
-            <div class="ep-color" style="background:#c9a96e" onclick="setVidTextColor(this,'#c9a96e')"></div>
+          <div class="ep-colors">
+            <div class="ep-color active" style="background:white;" onclick="setVidTextColor(this,'white')"></div>
+            <div class="ep-color" style="background:black;" onclick="setVidTextColor(this,'black')"></div>
+            <div class="ep-color" style="background:#c8a45a;" onclick="setVidTextColor(this,'#c8a45a')"></div>
           </div>
         </div>
-
         <div class="ep-section">
-          <div class="ep-title">כוונון וידאו</div>
-          <div class="ep-slider-row">
-            <div class="ep-slider-label"><span>בהירות</span><span id="valVidBrightness">100%</span></div>
-            <input class="ep-slider" type="range" min="0" max="200" value="100" id="sVidBrightness" oninput="applyVideoFilter()">
-          </div>
-          <div class="ep-slider-row">
-            <div class="ep-slider-label"><span>ניגודיות</span><span id="valVidContrast">100%</span></div>
-            <input class="ep-slider" type="range" min="0" max="200" value="100" id="sVidContrast" oninput="applyVideoFilter()">
-          </div>
-          <div class="ep-slider-row">
-            <div class="ep-slider-label"><span>רוויה</span><span id="valVidSaturate">100%</span></div>
-            <input class="ep-slider" type="range" min="0" max="300" value="100" id="sVidSaturate" oninput="applyVideoFilter()">
-          </div>
+          <div class="ep-label">כוונון</div>
+          <div class="ep-slider-wrap"><div class="ep-sl-top"><span>בהירות</span><span id="valVidBrightness">100%</span></div><input class="ep-slider" type="range" min="0" max="200" value="100" id="sVidBrightness" oninput="applyVideoFilter()"></div>
+          <div class="ep-slider-wrap"><div class="ep-sl-top"><span>ניגודיות</span><span id="valVidContrast">100%</span></div><input class="ep-slider" type="range" min="0" max="200" value="100" id="sVidContrast" oninput="applyVideoFilter()"></div>
+          <div class="ep-slider-wrap"><div class="ep-sl-top"><span>רוויה</span><span id="valVidSaturate">100%</span></div><input class="ep-slider" type="range" min="0" max="300" value="100" id="sVidSaturate" oninput="applyVideoFilter()"></div>
         </div>
-
         <div class="ep-section">
-          <div class="ep-title" style="color:#f90;">🎬 ייצוא</div>
-          <p style="font-size:.72rem;color:#888;margin-bottom:8px;">שמור קובץ המכיל כיתוב וכוונונים</p>
-          <button class="btn btn-primary btn-sm" onclick="exportVideo()" style="width:100%;">⬇ ייצא סרטון</button>
+          <button class="editor-btn editor-btn-gold" style="width:100%;padding:10px;" onclick="exportVideo()">⬇ ייצא סרטון</button>
         </div>
       </div>
-
     </div>
+
+    <!-- CANVAS -->
+    <div class="editor-canvas-area" id="editorCanvasArea">
+      <canvas id="editorCanvas"></canvas>
+      <video id="editorVideo" controls style="display:none;" playsinline></video>
+    </div>
+
   </div>
 </div>
 
-<!-- Action Bar (multi-select) -->
-<div class="action-bar" id="actionBar">
-  <span class="count" id="selCount">0</span> נבחרו
-  <div class="divider"></div>
-  <button class="action-btn" onclick="openEditModal()">✏️ ערוך תמונות</button>
-  <button class="action-btn" onclick="openVideoModal()">🎬 מזג סרטונים</button>
-  <button class="action-btn" onclick="openPostModal('selected')">✍️ כתוב פוסט</button>
-  <div class="divider"></div>
-  <button class="action-btn" onclick="deleteSelected()" style="color:#ff6b6b;">🗑️</button>
-</div>
-
-<!-- ======== EDIT MODAL ======== -->
-<div class="modal-overlay" id="editModal">
-  <div class="modal">
-    <div class="modal-header">
-      <h2>✏️ עריכת תמונות ב־AI</h2>
-      <button class="modal-close" onclick="closeModal('editModal')">✕</button>
-    </div>
-    <p style="font-size:.825rem;color:var(--text-muted);margin-bottom:16px;">בחר כלי — הוא ייפתח בטאב חדש. הורד את התמונה הגמורה ותחזור להעלות אותה.</p>
-    <div class="tools-grid">
-      <a class="tool-card" href="https://www.canva.com/photo-editor/" target="_blank">
-        <div class="tool-icon">🎨</div>
-        <div class="tool-name">Canva</div>
-        <div class="tool-desc">עריכה כללית, טקסט, לוגו, פילטרים, רקעים</div>
-        <span class="tool-free">חינם</span>
-      </a>
-      <a class="tool-card" href="https://www.remove.bg" target="_blank">
-        <div class="tool-icon">✂️</div>
-        <div class="tool-name">Remove.bg</div>
-        <div class="tool-desc">הסרת רקע אוטומטית בלחיצה</div>
-        <span class="tool-free">חינם</span>
-      </a>
-      <a class="tool-card" href="https://clipdrop.co/relight" target="_blank">
-        <div class="tool-icon">💡</div>
-        <div class="tool-name">Clipdrop — Relight</div>
-        <div class="tool-desc">שינוי תאורה בצילומי חדרים — מושלם לעיצוב פנים</div>
-        <span class="tool-free">חינם</span>
-      </a>
-      <a class="tool-card" href="https://clipdrop.co/cleanup" target="_blank">
-        <div class="tool-icon">🧹</div>
-        <div class="tool-name">Clipdrop — Cleanup</div>
-        <div class="tool-desc">מחיקת אובייקטים לא רצויים מהתמונה</div>
-        <span class="tool-free">חינם</span>
-      </a>
-      <a class="tool-card" href="https://www.adobe.com/express/feature/image/editor" target="_blank">
-        <div class="tool-icon">🔵</div>
-        <div class="tool-name">Adobe Express</div>
-        <div class="tool-desc">עריכה מקצועית + תבניות לרשתות חברתיות</div>
-        <span class="tool-free">חינם</span>
-      </a>
-      <a class="tool-card" href="https://letsenhance.io" target="_blank">
-        <div class="tool-icon">🔍</div>
-        <div class="tool-name">Let's Enhance</div>
-        <div class="tool-desc">שיפור איכות ורזולוציה של תמונות מטושטשות</div>
-        <span class="tool-free">חינם</span>
-      </a>
-      <a class="tool-card" href="https://app.fotor.com/photo-editor-app/" target="_blank">
-        <div class="tool-icon">🌈</div>
-        <div class="tool-name">Fotor</div>
-        <div class="tool-desc">עריכת צבעים, בהירות, ניגודיות — מותאם לעיצוב</div>
-        <span class="tool-free">חינם</span>
-      </a>
-      <a class="tool-card" href="https://magicstudio.com/magiceraser/" target="_blank">
-        <div class="tool-icon">🪄</div>
-        <div class="tool-name">Magic Eraser</div>
-        <div class="tool-desc">מחיקת אלמנטים מהתמונה בציור</div>
-        <span class="tool-free">חינם</span>
-      </a>
-    </div>
-    <p style="font-size:.75rem;color:var(--text-muted);text-align:center;">💡 אחרי העריכה — הורד ובצע העלאה חדשה לאפליקציה</p>
-  </div>
-</div>
-
-<!-- ======== VIDEO MODAL ======== -->
-<div class="modal-overlay" id="videoModal">
-  <div class="modal">
-    <div class="modal-header">
-      <h2>🎬 כלי וידאו</h2>
-      <button class="modal-close" onclick="closeModal('videoModal')">✕</button>
-    </div>
-
-    <!-- Merge Section -->
-    <div class="video-section">
-      <h3>מיזוג סרטונים</h3>
-      <div id="videoMergeList" class="video-list"></div>
-      <p style="font-size:.75rem;color:var(--text-muted);margin-bottom:10px;">סרטונים נבחרים יופיעו לפי הסדר — ניתן לגרור לשינוי סדר</p>
-    </div>
-
-    <!-- Transitions -->
-    <div class="video-section">
-      <h3>מעבר בין סרטונים</h3>
-      <div class="transition-picker">
-        <button class="trans-btn active" data-trans="none" onclick="setTransition(this)">ללא</button>
-        <button class="trans-btn" data-trans="fade" onclick="setTransition(this)">Fade</button>
-        <button class="trans-btn" data-trans="slide" onclick="setTransition(this)">Slide</button>
-        <button class="trans-btn" data-trans="zoom" onclick="setTransition(this)">Zoom In</button>
-        <button class="trans-btn" data-trans="dissolve" onclick="setTransition(this)">Dissolve</button>
-      </div>
-    </div>
-
-    <!-- Caption -->
-    <div class="caption-area">
-      <label>כיתוב / לוגו על הסרטון (אופציונלי)</label>
-      <input type="text" id="captionText" placeholder="ליבנת בניזרי | עיצוב פנים">
-      <div class="caption-style">
-        <button class="cap-style-btn active" data-style="elegant" onclick="setCapStyle(this)">אלגנטי</button>
-        <button class="cap-style-btn" data-style="bold" onclick="setCapStyle(this)">Bold</button>
-        <button class="cap-style-btn" data-style="minimal" onclick="setCapStyle(this)">מינימל</button>
-        <button class="cap-style-btn" data-style="bottom" onclick="setCapStyle(this)">תחתית</button>
-      </div>
-    </div>
-
-    <!-- Online Tools for video -->
-    <div class="video-section">
-      <h3>כלים מקוונים (חינם)</h3>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-        <a class="tool-card" href="https://www.capcut.com" target="_blank" style="padding:12px;">
-          <div class="tool-icon" style="font-size:1.3rem;">✂️</div>
-          <div class="tool-name" style="font-size:.82rem;">CapCut</div>
-          <div class="tool-desc" style="font-size:.7rem;">עריכה מלאה + AI + כתוביות</div>
-          <span class="tool-free">חינם</span>
-        </a>
-        <a class="tool-card" href="https://www.veed.io" target="_blank" style="padding:12px;">
-          <div class="tool-icon" style="font-size:1.3rem;">🎞️</div>
-          <div class="tool-name" style="font-size:.82rem;">VEED.io</div>
-          <div class="tool-desc" style="font-size:.7rem;">מיזוג, כתוביות, לוגו, ייצוא</div>
-          <span class="tool-free">חינם</span>
-        </a>
-        <a class="tool-card" href="https://clideo.com/merge-videos" target="_blank" style="padding:12px;">
-          <div class="tool-icon" style="font-size:1.3rem;">🔗</div>
-          <div class="tool-name" style="font-size:.82rem;">Clideo Merge</div>
-          <div class="tool-desc" style="font-size:.7rem;">מיזוג מהיר ללא הורדה</div>
-          <span class="tool-free">חינם</span>
-        </a>
-        <a class="tool-card" href="https://www.canva.com/video-editor/" target="_blank" style="padding:12px;">
-          <div class="tool-icon" style="font-size:1.3rem;">🎬</div>
-          <div class="tool-name" style="font-size:.82rem;">Canva Video</div>
-          <div class="tool-desc" style="font-size:.7rem;">עריכה + מעברים + מוזיקה</div>
-          <span class="tool-free">חינם</span>
-        </a>
-      </div>
-    </div>
-
-    <div style="text-align:center;margin-top:8px;">
-      <p style="font-size:.75rem;color:var(--text-muted);">💡 המלצה: CapCut לרילס קצרים, VEED.io לפרויקטים ארוכים יותר</p>
-    </div>
-  </div>
-</div>
-
-<!-- ======== POST COPY MODAL ======== -->
-<div class="modal-overlay" id="postModal">
-  <div class="modal" style="max-width:720px;">
+<!-- ══ POST MODAL ══ -->
+<div class="modal-bg" id="postModal">
+  <div class="modal" style="max-width:700px;">
     <div class="modal-header">
       <h2>✍️ כתיבת פוסט</h2>
       <button class="modal-close" onclick="closeModal('postModal')">✕</button>
     </div>
-
-    <div class="post-type-toggle">
-      <button class="post-type-btn active organic" data-type="organic" onclick="setPostType(this)">🌱 אורגני</button>
-      <button class="post-type-btn paid" data-type="paid" onclick="setPostType(this)">💰 ממומן</button>
+    <div class="post-type-row">
+      <button class="pt-btn active organic" data-type="organic" onclick="setPostType(this)">🌱 אורגני</button>
+      <button class="pt-btn paid" data-type="paid" onclick="setPostType(this)">💰 ממומן</button>
     </div>
-
     <div id="organicFields">
-      <div class="form-row">
-        <label>סוג פרויקט</label>
-        <select id="projectType">
-          <option value="">בחר...</option>
-          <option value="salon">סלון</option>
-          <option value="kitchen">מטבח</option>
-          <option value="bedroom">חדר שינה</option>
-          <option value="bathroom">חדר רחצה</option>
-          <option value="full">בית שלם</option>
-          <option value="office">משרד</option>
-          <option value="other">אחר</option>
-        </select>
-      </div>
-      <div class="form-row">
-        <label>מה הכי מיוחד בפרויקט הזה?</label>
-        <textarea id="projectHighlight" placeholder="למשל: גוונים חמים, שילוב ספה קטיפה עם שיש לבן, פתרון חכם לאחסון..."></textarea>
-      </div>
-      <div class="form-row">
-        <label>פרטים על הלקוח (אופציונלי)</label>
-        <input type="text" id="clientDetails" placeholder="למשל: משפחה עם ילדים, רצו פונקציונלי ואלגנטי">
-      </div>
-      <div class="form-row">
-        <label>מיקום / עיר (אופציונלי)</label>
-        <input type="text" id="location" placeholder="למשל: תל אביב, רמת גן...">
-      </div>
+      <div class="form-row"><label>סוג פרויקט</label><select id="projectType"><option value="">בחר...</option><option value="salon">סלון</option><option value="kitchen">מטבח</option><option value="bedroom">חדר שינה</option><option value="bathroom">חדר רחצה</option><option value="full">בית שלם</option><option value="office">משרד</option><option value="other">אחר</option></select></div>
+      <div class="form-row"><label>מה מיוחד בפרויקט?</label><textarea id="projectHighlight" placeholder="למשל: גוונים חמים, שילוב ספה קטיפה עם שיש לבן..."></textarea></div>
+      <div class="form-row"><label>פרטים על הלקוח (אופציונלי)</label><input type="text" id="clientDetails" placeholder="למשל: משפחה עם ילדים"></div>
+      <div class="form-row"><label>עיר (אופציונלי)</label><input type="text" id="location" placeholder="תל אביב, רמת גן..."></div>
     </div>
-
     <div id="paidFields" style="display:none;">
-      <div class="form-row">
-        <label>מטרת המודעה</label>
-        <select id="adGoal">
-          <option value="leads">לידים — השאר פרטים</option>
-          <option value="awareness">מודעות — הכר את ליבנת</option>
-          <option value="reel">צפיות ברילס</option>
-          <option value="message">שלח הודעה</option>
-        </select>
-      </div>
-      <div class="form-row">
-        <label>קהל יעד</label>
-        <select id="adAudience">
-          <option value="families">משפחות עם ילדים</option>
-          <option value="couples">זוגות</option>
-          <option value="renovating">בעלי בית בשיפוץ</option>
-          <option value="new_apt">דירה חדשה</option>
-          <option value="general">כללי</option>
-        </select>
-      </div>
-      <div class="form-row">
-        <label>מה מוצג במדיה?</label>
-        <input type="text" id="adVisual" placeholder="למשל: מטבח לפני/אחרי, סרטון סיבוב בבית">
-      </div>
-      <div class="form-row">
-        <label>הצעת ערך ייחודית</label>
-        <input type="text" id="adUsp" placeholder="ניסיון בשיפוצים / ליווי מלא / מחיר שקוף">
-      </div>
+      <div class="form-row"><label>מטרת המודעה</label><select id="adGoal"><option value="leads">לידים</option><option value="awareness">מודעות</option><option value="reel">צפיות ברילס</option></select></div>
+      <div class="form-row"><label>קהל יעד</label><select id="adAudience"><option value="families">משפחות עם ילדים</option><option value="couples">זוגות</option><option value="renovating">בשיפוץ</option><option value="new_apt">דירה חדשה</option><option value="general">כללי</option></select></div>
+      <div class="form-row"><label>מה מוצג במדיה?</label><input type="text" id="adVisual" placeholder="מטבח לפני/אחרי, סרטון סיבוב..."></div>
+      <div class="form-row"><label>הצעת ערך ייחודית</label><input type="text" id="adUsp" placeholder="ניסיון בשיפוצים / ליווי מלא"></div>
     </div>
-
-    <div style="display:flex;gap:10px;margin-top:4px;">
+    <div style="display:flex;gap:10px;margin-top:6px;">
       <button class="btn btn-primary" onclick="generatePost()" id="genBtn" style="flex:1;">✨ צור פוסט</button>
-      <button class="btn btn-ghost" onclick="generatePost(true)" style="flex:0 0 auto;">🔄 גרסה נוספת</button>
+      <button class="btn btn-ghost" onclick="generatePost(true)">🔄 גרסה נוספת</button>
     </div>
-
     <div id="generatedPost" style="display:none;">
-      <div class="generated-post" id="postText"></div>
+      <div class="generated-box" id="postText"></div>
       <div class="post-actions">
         <button class="btn btn-primary btn-sm" onclick="copyPost()">📋 העתק</button>
         <button class="btn btn-ghost btn-sm" onclick="savePost()">💾 שמור</button>
-        <a class="btn btn-ghost btn-sm" href="https://www.facebook.com" target="_blank">📘 פתח פייסבוק</a>
-        <a class="btn btn-ghost btn-sm" href="https://www.instagram.com" target="_blank">📸 פתח אינסטגרם</a>
+        <a class="btn btn-ghost btn-sm" href="https://www.facebook.com" target="_blank">📘 פייסבוק</a>
+        <a class="btn btn-ghost btn-sm" href="https://www.instagram.com" target="_blank">📸 אינסטגרם</a>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Notification -->
-<div class="notif" id="notif"></div>
+<!-- ══ FAB ══ -->
+<div class="fab" id="fab">
+  <span class="fab-count" id="fabCount">0</span> נבחרו
+  <div class="fab-div"></div>
+  <button class="fab-btn" onclick="openEditorForSelected()">✏️ ערוך</button>
+  <button class="fab-btn" onclick="openPostModal('selected')">✍️ פוסט</button>
+  <div class="fab-div"></div>
+  <button class="fab-btn danger" onclick="deleteSelected()">🗑️</button>
+</div>
+
+<!-- ══ TOAST ══ -->
+<div class="toast" id="toast"></div>
 
 <script>
-// ======= STATE =======
-let mediaItems = JSON.parse(localStorage.getItem('livnat_media') || '[]');
-let postHistory = JSON.parse(localStorage.getItem('livnat_posts') || '[]');
+// ══ STATE ══
+let mediaItems = JSON.parse(localStorage.getItem('lv_media') || '[]');
+let postHistory = JSON.parse(localStorage.getItem('lv_posts') || '[]');
 let selectedIds = new Set();
+let filterQuery = '';
 let currentPostType = 'organic';
 let postVariant = 0;
 
-// ======= SAVE =======
-function saveMedia() { localStorage.setItem('livnat_media', JSON.stringify(mediaItems.map(m => ({...m, src: m.src ? m.src : null})))); }
-function savePosts() { localStorage.setItem('livnat_posts', JSON.stringify(postHistory)); }
+// Editor state
+let editorItem = null, editorImg = null;
+let editorRotation = 0, editorFlipH = false, editorFlipV = false;
+let editorTextPos = 'bottom-center', editorTextColor = 'white';
+let editorUndoStack = [];
+let vidTextPos = 'bottom', vidTextColor = 'white';
 
-// ======= RENDER =======
-function render() {
+// ══ PAGE NAV ══
+function showPage(name, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  btn.classList.add('active');
+  if (name === 'posts') renderHistory();
+}
+
+// ══ RENDER GALLERY ══
+function render(query) {
   const grid = document.getElementById('mediaGrid');
   const empty = document.getElementById('emptyState');
-  document.getElementById('mediaCount').textContent = mediaItems.length;
+  const items = query
+    ? mediaItems.filter(m => m.name.toLowerCase().includes(query.toLowerCase()))
+    : mediaItems;
 
-  // Remove all cards (keep empty state)
+  document.getElementById('mediaCount').textContent = items.length ? `(${items.length})` : '';
+  document.getElementById('mediaCountBadge').textContent = mediaItems.length ? `· ${mediaItems.length} קבצים` : '';
+
   Array.from(grid.querySelectorAll('.media-card')).forEach(c => c.remove());
-
-  if (mediaItems.length === 0) {
-    empty.style.display = '';
-    return;
-  }
+  if (items.length === 0) { empty.style.display = ''; return; }
   empty.style.display = 'none';
 
-  mediaItems.forEach(item => {
+  items.forEach(item => {
     const card = document.createElement('div');
     card.className = 'media-card' + (selectedIds.has(item.id) ? ' selected' : '');
     card.dataset.id = item.id;
-    card.onclick = () => openEditorForItem(item);
 
-    const isVideo = item.type === 'video';
-    const thumb = document.createElement('div');
-    thumb.className = 'thumb';
-
-    if (item.src === 'HEIC_UNSUPPORTED') {
-      thumb.style.cssText += 'flex-direction:column;gap:6px;padding:10px;';
-      thumb.innerHTML = `
-        <span style="font-size:1.8rem;">📷</span>
-        <span style="font-size:.68rem;font-weight:700;color:var(--text);">HEIC מהאייפון</span>
-        <span style="font-size:.62rem;color:var(--text-muted);text-align:center;line-height:1.4;">הדפדפן לא תומך.<br>
-        <a href="ms-windows-store://pdp/?productid=9PMMSR1CGPWG" style="color:var(--accent-dark);text-decoration:underline;">התקן קודק HEIC</a><br>
-        או העלה כ-JPG</span>`;
-    } else if (item.src) {
-      if (isVideo) {
+    // Thumb
+    if (item.src && item.src !== 'HEIC_UNSUPPORTED') {
+      if (item.type === 'video') {
         const vid = document.createElement('video');
-        vid.src = item.src;
-        vid.style.cssText = 'width:100%;height:100%;object-fit:cover;';
-        thumb.appendChild(vid);
+        vid.src = item.src; vid.style.cssText = 'width:100%;display:block;';
+        card.appendChild(vid);
       } else {
         const img = document.createElement('img');
-        img.src = item.src;
-        img.alt = item.name;
-        img.onerror = () => {
-          img.remove();
-          thumb.style.cssText += 'flex-direction:column;gap:4px;';
-          thumb.innerHTML = '<span style="font-size:2rem;">📷</span><span style="font-size:.65rem;color:var(--text-muted);">לא ניתן להציג</span>';
-        };
-        thumb.appendChild(img);
+        img.src = item.src; img.alt = item.name;
+        img.style.cssText = 'width:100%;display:block;';
+        card.appendChild(img);
       }
     } else {
-      // src is null — still converting (HEIC in progress)
-      thumb.style.cssText += 'flex-direction:column;gap:4px;';
-      thumb.innerHTML = isVideo
-        ? '<span style="font-size:2rem;">🎬</span>'
-        : '<span style="font-size:1.5rem;">⏳</span><span style="font-size:.65rem;color:var(--text-muted);">ממיר...</span>';
+      const ph = document.createElement('div');
+      ph.style.cssText = 'width:100%;aspect-ratio:1;background:var(--warm);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;';
+      ph.innerHTML = `<span style="font-size:2rem;">${item.type==='video'?'🎬':'📷'}</span><span style="font-size:.65rem;color:var(--muted);">${item.type==='video'?'VIDEO':'HEIC'}</span>`;
+      card.appendChild(ph);
     }
 
-    const badge = document.createElement('div');
-    badge.className = 'type-badge';
-    badge.textContent = isVideo ? 'VIDEO' : 'IMG';
+    // Overlay
+    const ov = document.createElement('div');
+    ov.className = 'mc-overlay';
+    ov.innerHTML = `
+      <div class="mc-overlay-top">
+        <div class="mc-check" onclick="event.stopPropagation();toggleSelect('${item.id}')">${selectedIds.has(item.id)?'✓':''}</div>
+        <div class="mc-type-badge">${item.type==='video'?'VIDEO':'IMG'}</div>
+      </div>
+      <div class="mc-actions">
+        <button class="mc-action" onclick="event.stopPropagation();openEditorForItem(item_${item.id})">✏️ ערוך</button>
+        <button class="mc-action" onclick="event.stopPropagation();openPostFromItem('${item.id}')">✍️ פוסט</button>
+      </div>
+      <div class="mc-name">${item.name}</div>
+    `;
+    card.appendChild(ov);
 
-    const check = document.createElement('div');
-    check.className = 'check';
-    check.textContent = '✓';
+    // Store ref
+    window[`item_${item.id}`] = item;
+    card.onclick = () => openEditorForItem(item);
 
-    const info = document.createElement('div');
-    info.className = 'info';
-    info.innerHTML = `<div class="name">${item.name}</div><div class="meta">${item.size || ''}</div>`;
-
-    card.appendChild(thumb);
-    card.appendChild(badge);
-    card.appendChild(check);
-    card.appendChild(info);
     grid.appendChild(card);
   });
 
-  updateActionBar();
+  updateFab();
 }
 
-function renderHistory() {
-  const list = document.getElementById('historyList');
-  if (postHistory.length === 0) {
-    list.innerHTML = `<div class="empty-state"><div class="big">✍️</div><p>עוד לא נכתבו פוסטים</p><p style="font-size:.75rem;margin-top:4px;">לחץ "פוסט חדש" או בחר מדיה מהגלריה</p></div>`;
-    return;
+function filterMedia(q) { filterQuery = q; render(q); }
+
+// ══ SELECTION ══
+function toggleSelect(id) {
+  if (selectedIds.has(id)) selectedIds.delete(id);
+  else selectedIds.add(id);
+  render(filterQuery);
+}
+function selectAll() { mediaItems.forEach(m => selectedIds.add(m.id)); render(filterQuery); }
+function clearSelection() { selectedIds.clear(); render(filterQuery); }
+function deleteSelected() {
+  if (!confirm(`למחוק ${selectedIds.size} קבצים?`)) return;
+  mediaItems = mediaItems.filter(m => !selectedIds.has(m.id));
+  selectedIds.clear();
+  saveMeta(); render(filterQuery);
+  notify('נמחקו');
+}
+function updateFab() {
+  const fab = document.getElementById('fab');
+  const n = selectedIds.size;
+  document.getElementById('fabCount').textContent = n;
+  fab.classList.toggle('show', n > 0);
+  const btn = document.getElementById('clearSelBtn');
+  if (btn) btn.style.display = n > 0 ? '' : 'none';
+}
+
+// ══ FILE HANDLING ══
+function handleFiles(files) {
+  Array.from(files).forEach(file => {
+    const isVideo = file.type.startsWith('video/');
+    const id = Date.now() + '' + Math.random();
+    const size = formatSize(file.size);
+    const isHeic = /\.(heic|heif)$/i.test(file.name) || file.type === 'image/heic';
+
+    if (isHeic) {
+      const item = { id, name: file.name, type: 'image', size, src: null, isHeic: true };
+      mediaItems.unshift(item);
+      render(filterQuery);
+      createImageBitmap(file)
+        .then(bmp => {
+          const s = Math.min(1, 800/Math.max(bmp.width,bmp.height));
+          const c = document.createElement('canvas');
+          c.width = Math.round(bmp.width*s); c.height = Math.round(bmp.height*s);
+          c.getContext('2d').drawImage(bmp,0,0,c.width,c.height);
+          item.src = c.toDataURL('image/jpeg',.85);
+          render(filterQuery);
+        })
+        .catch(() => {
+          const fr = new FileReader();
+          fr.onload = e => { item.src = e.target.result; render(filterQuery); };
+          fr.readAsDataURL(file);
+        });
+    } else {
+      mediaItems.unshift({ id, name: file.name, type: isVideo?'video':'image', size, src: URL.createObjectURL(file) });
+      render(filterQuery);
+    }
+  });
+  notify(`${files.length} קבצים הועלו ✓`);
+}
+
+function formatSize(b) { return b > 1e6 ? (b/1e6).toFixed(1)+' MB' : (b/1e3).toFixed(0)+' KB'; }
+function saveMeta() { /* localStorage skipped for large files */ }
+
+// Drag-drop
+const dz = document.getElementById('dropZone');
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('over'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('over'));
+dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('over'); handleFiles(e.dataTransfer.files); });
+
+// ══ EDITOR ══
+function openEditorForItem(item) {
+  editorItem = item;
+  document.getElementById('editorTitle').textContent = item.name;
+  document.getElementById('editorOverlay').classList.add('show');
+
+  // Reset
+  editorRotation = 0; editorFlipH = false; editorFlipV = false; editorUndoStack = [];
+  document.querySelectorAll('.ep-slider').forEach(s => { s.value = s.defaultValue; });
+  document.getElementById('imgTextInput').value = '';
+
+  const canvas = document.getElementById('editorCanvas');
+  const video = document.getElementById('editorVideo');
+
+  if (item.type === 'video') {
+    canvas.style.display = 'none'; video.style.display = '';
+    video.src = item.src || '';
+    document.getElementById('photoPanel').style.display = 'none';
+    document.getElementById('videoPanel').style.display = '';
+    video.onloadedmetadata = () => updateTrim();
+  } else {
+    canvas.style.display = ''; video.style.display = 'none';
+    document.getElementById('photoPanel').style.display = '';
+    document.getElementById('videoPanel').style.display = 'none';
+    editorImg = new Image();
+    editorImg.crossOrigin = 'anonymous';
+    editorImg.onload = () => applyFilters();
+    editorImg.src = item.src || '';
   }
-  list.innerHTML = postHistory.map((p, i) => `
-    <div class="history-item">
-      <div class="hi-header">
-        <span class="tag ${p.type === 'organic' ? 'tag-organic' : 'tag-paid'}">${p.type === 'organic' ? '🌱 אורגני' : '💰 ממומן'}</span>
-        <span class="hi-title">${p.project || 'פוסט'}</span>
-        <span class="hi-date">${p.date}</span>
+}
+
+function openEditorForSelected() {
+  const imgs = mediaItems.filter(m => selectedIds.has(m.id));
+  if (imgs.length === 0) { notify('בחר קבצים תחילה'); return; }
+  openEditorForItem(imgs[0]);
+}
+
+function closeEditor() {
+  document.getElementById('editorOverlay').classList.remove('show');
+  const v = document.getElementById('editorVideo'); v.pause(); v.src = '';
+  editorItem = null; editorImg = null;
+}
+
+function applyFilters() {
+  if (!editorImg?.complete) return;
+  const canvas = document.getElementById('editorCanvas');
+  const ctx = canvas.getContext('2d');
+  const br = document.getElementById('sBrightness').value;
+  const co = document.getElementById('sContrast').value;
+  const sa = document.getElementById('sSaturate').value;
+  const warm = parseInt(document.getElementById('sWarm').value);
+  const bl = document.getElementById('sBlur').value;
+  const fs = document.getElementById('sFontSize').value;
+
+  document.getElementById('valBrightness').textContent = br+'%';
+  document.getElementById('valContrast').textContent = co+'%';
+  document.getElementById('valSaturate').textContent = sa+'%';
+  document.getElementById('valWarm').textContent = warm;
+  document.getElementById('valBlur').textContent = bl;
+  document.getElementById('valFontSize').textContent = fs+'px';
+
+  const w = editorImg.naturalWidth, h = editorImg.naturalHeight;
+  const rotated = editorRotation % 180 !== 0;
+  canvas.width = rotated ? h : w;
+  canvas.height = rotated ? w : h;
+
+  ctx.save();
+  ctx.translate(canvas.width/2, canvas.height/2);
+  ctx.rotate(editorRotation * Math.PI / 180);
+  ctx.scale(editorFlipH?-1:1, editorFlipV?-1:1);
+  ctx.filter = `brightness(${br}%) contrast(${co}%) saturate(${sa}%) blur(${bl}px)`;
+  ctx.drawImage(editorImg, -w/2, -h/2);
+  ctx.restore();
+  ctx.filter = 'none';
+
+  if (warm !== 0) {
+    ctx.globalCompositeOperation = warm > 0 ? 'multiply' : 'screen';
+    ctx.fillStyle = warm > 0
+      ? `rgba(255,${Math.max(0,150-warm)},0,${Math.abs(warm)/200})`
+      : `rgba(0,${Math.min(255,150+Math.abs(warm))},255,${Math.abs(warm)/200})`;
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.globalCompositeOperation = 'source-over';
+  }
+
+  const txt = document.getElementById('imgTextInput').value.trim();
+  if (txt) {
+    const fsi = parseInt(fs);
+    ctx.font = `bold ${fsi}px 'Segoe UI', Arial, sans-serif`;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    const pad = fsi * 0.6;
+    const tx = canvas.width/2;
+    let ty;
+    if (editorTextPos==='bottom-center') ty = canvas.height - fsi - pad;
+    else if (editorTextPos==='top-center') ty = fsi + pad;
+    else ty = canvas.height/2;
+    ctx.fillStyle = 'rgba(0,0,0,0.45)';
+    ctx.fillRect(0, ty-fsi*.7, canvas.width, fsi*1.4);
+    ctx.fillStyle = editorTextColor;
+    ctx.fillText(txt, tx, ty);
+  }
+}
+
+function applyPreset(btn, preset) {
+  document.querySelectorAll('#photoPanel .ep-preset').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  const p = {original:[100,100,100,0,0],warm:[105,100,110,30,0],cool:[100,100,95,-25,0],vivid:[105,115,160,0,0],vintage:[90,85,60,20,0],bw:[100,110,0,0,0],dramatic:[95,140,90,0,0],bright:[130,95,105,10,0]};
+  const [br,co,sa,wa,bl] = p[preset]||p.original;
+  document.getElementById('sBrightness').value=br;
+  document.getElementById('sContrast').value=co;
+  document.getElementById('sSaturate').value=sa;
+  document.getElementById('sWarm').value=wa;
+  document.getElementById('sBlur').value=bl;
+  applyFilters();
+}
+
+function editorRotate(deg) {
+  editorUndoStack.push({r:editorRotation,fh:editorFlipH,fv:editorFlipV});
+  editorRotation = (editorRotation+deg+360)%360; applyFilters();
+}
+function editorFlip(axis) {
+  editorUndoStack.push({r:editorRotation,fh:editorFlipH,fv:editorFlipV});
+  if (axis==='h') editorFlipH=!editorFlipH; else editorFlipV=!editorFlipV; applyFilters();
+}
+function editorUndo() {
+  if (!editorUndoStack.length) return;
+  const s=editorUndoStack.pop(); editorRotation=s.r; editorFlipH=s.fh; editorFlipV=s.fv; applyFilters();
+}
+function setTextPos(btn,pos) {
+  btn.closest('.ep-mini-tabs').querySelectorAll('.ep-mini-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active'); editorTextPos=pos; applyFilters();
+}
+function setTextColor(btn,c) {
+  btn.closest('.ep-colors').querySelectorAll('.ep-color').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active'); editorTextColor=c; applyFilters();
+}
+function editorDownload() {
+  if (editorItem?.type==='video') { exportVideo(); return; }
+  const c = document.getElementById('editorCanvas');
+  const a = document.createElement('a');
+  a.download = (editorItem?.name?.replace(/\.[^.]+$/,'')||'edited')+'_edited.jpg';
+  a.href = c.toDataURL('image/jpeg',.92); a.click();
+  notify('תמונה הורדה ✓');
+}
+
+// Video editor
+function applyVideoFilter() {
+  const v = document.getElementById('editorVideo');
+  const br=document.getElementById('sVidBrightness').value;
+  const co=document.getElementById('sVidContrast').value;
+  const sa=document.getElementById('sVidSaturate').value;
+  document.getElementById('valVidBrightness').textContent=br+'%';
+  document.getElementById('valVidContrast').textContent=co+'%';
+  document.getElementById('valVidSaturate').textContent=sa+'%';
+  v.style.filter=`brightness(${br}%) contrast(${co}%) saturate(${sa}%)`;
+}
+function updateTrim() {
+  const v=document.getElementById('editorVideo'); const dur=v.duration||0;
+  const sp=document.getElementById('trimStart').value/100;
+  const ep=document.getElementById('trimEnd').value/100;
+  document.getElementById('trimRange').style.left=(sp*100)+'%';
+  document.getElementById('trimRange').style.width=((ep-sp)*100)+'%';
+  document.getElementById('trimTime').textContent=`${ft(dur*sp)} – ${ft(dur*ep)}`;
+  v.currentTime=dur*sp;
+}
+function ft(s) { return `${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`; }
+function setVidTextPos(btn,p) { btn.closest('.ep-mini-tabs').querySelectorAll('.ep-mini-tab').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); vidTextPos=p; }
+function setVidTextColor(btn,c) { btn.closest('.ep-colors').querySelectorAll('.ep-color').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); vidTextColor=c; }
+
+function exportVideo() {
+  const v=document.getElementById('editorVideo');
+  const dur=v.duration||0;
+  const st=(document.getElementById('trimStart').value/100)*dur;
+  const et=(document.getElementById('trimEnd').value/100)*dur;
+  const cap=document.getElementById('vidTextInput').value.trim();
+  const c=document.createElement('canvas');
+  c.width=v.videoWidth||640; c.height=v.videoHeight||360;
+  const ctx=c.getContext('2d');
+  const br=document.getElementById('sVidBrightness').value;
+  const co=document.getElementById('sVidContrast').value;
+  const sa=document.getElementById('sVidSaturate').value;
+  const stream=c.captureStream(30);
+  const rec=new MediaRecorder(stream,{mimeType:'video/webm;codecs=vp8'});
+  const chunks=[];
+  rec.ondataavailable=e=>chunks.push(e.data);
+  rec.onstop=()=>{
+    const blob=new Blob(chunks,{type:'video/webm'});
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob); a.download='livnat_video.webm'; a.click();
+    notify('סרטון יוצא ✓');
+  };
+  v.currentTime=st; rec.start(); notify('מייצא...');
+  ctx.filter=`brightness(${br}%) contrast(${co}%) saturate(${sa}%)`;
+  const draw=()=>{
+    if (v.currentTime>=et||v.ended){rec.stop();return;}
+    ctx.drawImage(v,0,0,c.width,c.height);
+    if(cap){
+      const fsi=32; ctx.filter='none';
+      ctx.font=`bold ${fsi}px Arial`; ctx.textAlign='center';
+      const ty=vidTextPos==='top'?fsi+10:vidTextPos==='center'?c.height/2:c.height-fsi-10;
+      ctx.fillStyle='rgba(0,0,0,.4)'; ctx.fillRect(0,ty-fsi*.7,c.width,fsi*1.4);
+      ctx.fillStyle=vidTextColor; ctx.fillText(cap,c.width/2,ty);
+      ctx.filter=`brightness(${br}%) contrast(${co}%) saturate(${sa}%)`;
+    }
+    requestAnimationFrame(draw);
+  };
+  v.play(); requestAnimationFrame(draw);
+}
+
+// ══ POST GENERATOR ══
+const projectNames={salon:'סלון',kitchen:'מטבח',bedroom:'חדר שינה',bathroom:'חדר רחצה',full:'בית שלם',office:'משרד',other:'פרויקט'};
+const audienceTags={families:'משפחות',couples:'זוגות',renovating:'שיפוץ',new_apt:'דירה_חדשה',general:'בית'};
+
+const organicTemplates=[
+  p=>{
+    const parts=[`יש רגעים ב${p.ptype} שאת פשוט יודעת שזה יצא בדיוק כמו שדמיינו אותו 🤍`];
+    if(p.hl) parts.push(p.hl);
+    parts.push(`הכנתי תוכניות מדויקות, ישבתי עם הקבלן, ודאגתי שהכול ישב בול.\nאני לא רק מעצבת. אני מחזיקה את כל הפרויקט.`);
+    if(p.cl) parts.push(`${p.cl}, תודה על האמון 🙏`);
+    parts.push(`אם גם אתם לפני שיפוץ ורוצים תוצאה כזאת, שלחו לי הודעה 😊`);
+    parts.push(`\n#עיצובפנים #מעצבתפנים #ליבנתבניזרי #${p.pt}${p.loc?` #${p.loc.replace(/\s/g,'')}`:''} #שיפוץ`);
+    return parts.join('\n\n');
+  },
+  p=>{
+    const parts=[`${p.ptype} שמרגיש בדיוק נכון ✨`];
+    if(p.hl) parts.push(p.hl);
+    parts.push(`כשיש תכנון נכון, האור, הצבע, הריהוט, הכול מתחבר.\nלא מקרי. לא מזל. תכנון.`);
+    if(p.cl) parts.push(`תודה ${p.cl} על שיתוף הפעולה הנפלא ❤️`);
+    parts.push(`שאלות? שלחו הודעה 🙌`);
+    parts.push(`\n#${p.pt} #עיצוב_פנים #ליבנת_בניזרי #מעצבת_פנים${p.loc?` #${p.loc.replace(/\s/g,'')}`:''}`);
+    return parts.join('\n\n');
+  },
+  p=>{
+    const parts=[`פחדים מקבלנים, מחומרים, מטעויות יקרות? 😅`];
+    if(p.hl) parts.push(p.hl);
+    parts.push(`בדיוק בשביל זה אני כאן.\nאני לא מעצבת רק על הנייר. אני יוצאת לשטח, מדברת עם הקבלן, עוקבת אחר כל שלב.`);
+    if(p.cl) parts.push(`${p.cl}, הגעתם לתוצאה מושלמת כי עבדנו יחד 💪`);
+    parts.push(`רוצים לדעת איך זה עובד? כתבו לי 👇`);
+    parts.push(`\n#עיצוב_פנים #שיפוץ #מעצבת_פנים #ליבנת_בניזרי #${p.pt}`);
+    return parts.join('\n\n');
+  }
+];
+const paidTemplates=[
+  p=>{
+    const parts=[`ככה נראה ${p.vis||'בית'} כשיש תכנון נכון 🏠`];
+    parts.push(`אני ליבנת בניזרי, מעצבת פנים עם 10 שנות ניסיון בשיפוצים.\nלא רק על הנייר. גם בשטח, עם הקבלן, עד הפרט האחרון.`);
+    if(p.usp) parts.push(p.usp);
+    parts.push(`רוצים תוצאה כזאת? שלחו הודעה 😊`);
+    parts.push(`\n#עיצוב_פנים #מעצבת_פנים #ליבנת_בניזרי #${p.aud} #שיפוץ`);
+    return parts.join('\n\n');
+  },
+  p=>{
+    const parts=[`שיפוץ בקרוב? 🔨`];
+    parts.push(`הדבר הכי יקר בשיפוץ הוא טעות שאפשר היה למנוע.\nאני ליבנת, מעצבת פנים שגדלה מתוך עולם הבנייה.\nמבינה חומרים, מדברת עם קבלנים, ומוודאת שהכול יוצא כמו שתכננו.`);
+    if(p.usp) parts.push(p.usp);
+    parts.push(`כתבו לי ואחזור אליכם 👇`);
+    parts.push(`\n#שיפוץ_בית #עיצוב_פנים #ליבנת_בניזרי #מעצבת_פנים #${p.aud}`);
+    return parts.join('\n\n');
+  }
+];
+
+function openPostModal(src) {
+  document.getElementById('postModal').classList.add('show');
+  document.getElementById('generatedPost').style.display='none';
+}
+function openPostFromItem(id) {
+  openPostModal(id);
+  showPage('posts', document.querySelector('.nav-item:nth-child(2)'));
+}
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+document.querySelectorAll('.modal-bg').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('show');}));
+
+function setPostType(btn) {
+  document.querySelectorAll('.pt-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  currentPostType=btn.dataset.type;
+  document.getElementById('organicFields').style.display=currentPostType==='organic'?'':'none';
+  document.getElementById('paidFields').style.display=currentPostType==='paid'?'':'none';
+  document.getElementById('generatedPost').style.display='none';
+}
+
+function generatePost(newV=false) {
+  if(newV) postVariant++;
+  const btn=document.getElementById('genBtn');
+  btn.innerHTML='<span class="spinner"></span> יוצר...'; btn.disabled=true;
+  setTimeout(()=>{
+    let text='';
+    if(currentPostType==='organic'){
+      const ptype=document.getElementById('projectType').value;
+      const p={ptype:projectNames[ptype]||'פרויקט',hl:document.getElementById('projectHighlight').value,cl:document.getElementById('clientDetails').value,loc:document.getElementById('location').value,pt:(projectNames[ptype]||'עיצוב').replace(' ','_')};
+      text=organicTemplates[postVariant%organicTemplates.length](p);
+    }else{
+      const p={vis:document.getElementById('adVisual').value,usp:document.getElementById('adUsp').value,aud:audienceTags[document.getElementById('adAudience').value]||'בית'};
+      text=paidTemplates[postVariant%paidTemplates.length](p);
+    }
+    document.getElementById('postText').textContent=text;
+    document.getElementById('generatedPost').style.display='';
+    btn.innerHTML='✨ צור פוסט'; btn.disabled=false;
+    window._lastPost=text;
+  },500);
+}
+function copyPost() { navigator.clipboard.writeText(window._lastPost||document.getElementById('postText').textContent); notify('הועתק ✓'); }
+function savePost() {
+  const text=window._lastPost||document.getElementById('postText').textContent;
+  const ptype=currentPostType==='organic'?document.getElementById('projectType').value:'';
+  postHistory.unshift({type:currentPostType,project:projectNames[ptype]||'פוסט',text,date:new Date().toLocaleDateString('he-IL')});
+  localStorage.setItem('lv_posts',JSON.stringify(postHistory));
+  notify('נשמר ✓'); renderHistory();
+}
+function copyPostById(i) { navigator.clipboard.writeText(postHistory[i].text); notify('הועתק ✓'); }
+function deletePost(i) { postHistory.splice(i,1); localStorage.setItem('lv_posts',JSON.stringify(postHistory)); renderHistory(); }
+
+function renderHistory() {
+  const list=document.getElementById('historyList');
+  if(!postHistory.length){list.innerHTML='<div class="empty"><div class="ei">✍️</div><h3>עוד לא נכתבו פוסטים</h3><p>לחץ "פוסט חדש" למעלה</p></div>';return;}
+  list.innerHTML=postHistory.map((p,i)=>`
+    <div class="history-card">
+      <div class="hc-header">
+        <span class="tag ${p.type==='organic'?'tag-organic':'tag-paid'}">${p.type==='organic'?'🌱 אורגני':'💰 ממומן'}</span>
+        <span class="hc-title">${p.project}</span>
+        <span class="hc-date">${p.date}</span>
       </div>
-      <div class="hi-body">${p.text.substring(0, 140)}${p.text.length > 140 ? '...' : ''}</div>
-      <div class="hi-actions">
+      <div class="hc-body">${p.text.substring(0,150)}${p.text.length>150?'...':''}</div>
+      <div class="hc-actions">
         <button class="btn btn-ghost btn-sm" onclick="copyPostById(${i})">📋 העתק</button>
-        <button class="btn btn-ghost btn-sm" onclick="deletePost(${i})" style="color:var(--danger)">🗑️</button>
+        <button class="btn btn-ghost btn-sm" style="color:var(--danger);" onclick="deletePost(${i})">🗑️</button>
       </div>
     </div>
   `).join('');
 }
 
-// ======= HEIC LOADER (lazy) =======
-let _heic2anyReady = null;
-function loadHeic2Any() {
-  if (_heic2anyReady) return _heic2anyReady;
-  _heic2anyReady = new Promise((resolve, reject) => {
-    if (window.heic2any) { resolve(window.heic2any); return; }
-    const s = document.createElement('script');
-    s.src = 'https://unpkg.com/heic2any@0.0.4/dist/heic2any.min.js';
-    s.onload = () => resolve(window.heic2any);
-    s.onerror = reject;
-    document.head.appendChild(s);
-  });
-  return _heic2anyReady;
+// ══ STYLE PAGE ══
+function showFeed(name,btn) {
+  ['ig','fb','brand'].forEach(n=>{ const el=document.getElementById('feed-'+n); if(el) el.style.display='none'; });
+  document.getElementById('feed-'+name).style.display='';
+  document.querySelectorAll('.feed-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
 }
 
-// ======= FILE HANDLING =======
-function handleFiles(files) {
-  Array.from(files).forEach(file => {
-    const isVideo = file.type.startsWith('video/');
-    const id = Date.now() + Math.random();
-    const size = formatSize(file.size);
-    const isHeic = /\.(heic|heif)$/i.test(file.name)
-      || file.type === 'image/heic' || file.type === 'image/heif';
+// ══ UTILS ══
+function copyPhrase(el) { navigator.clipboard.writeText(el.textContent.replace(' 📋','').trim()); notify('הועתק ✓'); }
+function copyTag(el) { navigator.clipboard.writeText(el.textContent); notify(el.textContent+' הועתק'); }
+function copyAllTags() {
+  const tags=[...document.querySelectorAll('.tag-item')].map(t=>t.textContent).join(' ');
+  navigator.clipboard.writeText(tags); notify('כל האשטאגים הועתקו ✓');
+}
+function notify(msg) {
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2200);
+}
 
-    if (isHeic) {
-      const item = { id, name: file.name, type: 'image', size, src: null, isHeic: true };
-      mediaItems.unshift(item);
-      render();
-
-      // Step 1: try createImageBitmap (native, fast)
-      createImageBitmap(file)
-        .then(bitmap => {
-          const MAX = 800;
-          const scale = Math.min(1, MAX / Math.max(bitmap.width, bitmap.height));
-          const w = Math.round(bitmap.width * scale);
-          const h = Math.round(bitmap.height * scale);
-          const c = document.createElement('canvas');
-          c.width = w; c.height = h;
-          c.getContext('2d').drawImage(bitmap, 0, 0, w, h);
-          item.src = c.toDataURL('image/jpeg', 0.85);
-          render();
-        })
-        .catch(() => {
-          // Step 2: try heic2any
-          loadHeic2Any()
-            .then(fn => fn({ blob: file, toType: 'image/jpeg', quality: 0.85 }))
-            .then(blob => {
-              const b = Ar
+// ══ INIT ══
+render();
+renderHistory();
+</script>
+</body>
+</html>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
