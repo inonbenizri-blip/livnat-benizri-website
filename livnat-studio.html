@@ -1,0 +1,1393 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ליבנת סטודיו | ניהול תוכן</title>
+<style>
+  :root {
+    --bg: #f9f6f2;
+    --surface: #ffffff;
+    --border: #e8e0d8;
+    --accent: #c9a96e;
+    --accent-dark: #a07840;
+    --text: #2c2420;
+    --text-muted: #8a7a70;
+    --tag-organic: #4a7c59;
+    --tag-paid: #5c6bc0;
+    --danger: #d64045;
+    --radius: 14px;
+    --shadow: 0 2px 20px rgba(44,36,32,.08);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* ===== HEADER ===== */
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    height: 64px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: var(--shadow);
+  }
+  header .logo {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--accent-dark);
+    letter-spacing: 1px;
+    flex: 1;
+  }
+  header .logo span { color: var(--text-muted); font-weight: 400; font-size: .9rem; margin-right: 8px; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 16px; border-radius: 8px; font-size: .875rem;
+    cursor: pointer; border: none; transition: all .18s;
+    font-family: inherit; font-weight: 600;
+  }
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-primary:hover { background: var(--accent-dark); }
+  .btn-ghost { background: transparent; color: var(--text-muted); border: 1.5px solid var(--border); }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-sm { padding: 5px 11px; font-size: .78rem; }
+
+  /* ===== MAIN LAYOUT ===== */
+  main { max-width: 1280px; margin: 0 auto; padding: 32px 24px; }
+
+  /* ===== UPLOAD ZONE ===== */
+  .upload-zone {
+    border: 2px dashed var(--border);
+    border-radius: var(--radius);
+    padding: 40px;
+    text-align: center;
+    background: var(--surface);
+    cursor: pointer;
+    transition: all .2s;
+    margin-bottom: 32px;
+  }
+  .upload-zone:hover, .upload-zone.dragging {
+    border-color: var(--accent);
+    background: #fdf8f2;
+  }
+  .upload-zone .icon { font-size: 2.5rem; margin-bottom: 12px; }
+  .upload-zone h3 { font-size: 1.1rem; color: var(--text); margin-bottom: 6px; }
+  .upload-zone p { color: var(--text-muted); font-size: .875rem; }
+  #fileInput { display: none; }
+
+  /* ===== TABS ===== */
+  .tabs { display: flex; gap: 4px; margin-bottom: 24px; border-bottom: 2px solid var(--border); }
+  .tab {
+    padding: 10px 20px; cursor: pointer; border-radius: 8px 8px 0 0;
+    font-size: .875rem; font-weight: 600; color: var(--text-muted);
+    border: none; background: transparent; transition: all .15s;
+    font-family: inherit;
+  }
+  .tab.active { color: var(--accent-dark); background: var(--surface); border: 2px solid var(--border); border-bottom: 2px solid var(--surface); margin-bottom: -2px; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* ===== PROJECT GRID ===== */
+  .projects-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .projects-header h2 { font-size: 1.1rem; }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+  }
+  .media-card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1.5px solid var(--border);
+    transition: transform .15s, box-shadow .15s;
+    cursor: pointer;
+    position: relative;
+  }
+  .media-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+  .media-card.selected { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(201,169,110,.25); }
+  .media-card .thumb {
+    width: 100%; aspect-ratio: 1; object-fit: cover;
+    background: var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2rem; color: var(--text-muted);
+  }
+  .media-card .thumb img, .media-card .thumb video { width: 100%; height: 100%; object-fit: cover; }
+  .media-card .info { padding: 8px 10px; }
+  .media-card .info .name { font-size: .78rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .media-card .info .meta { font-size: .7rem; color: var(--text-muted); margin-top: 2px; }
+  .media-card .check {
+    position: absolute; top: 8px; right: 8px;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--accent); color: white;
+    display: none; align-items: center; justify-content: center;
+    font-size: .7rem; font-weight: 700;
+  }
+  .media-card.selected .check { display: flex; }
+  .media-card .type-badge {
+    position: absolute; top: 8px; left: 8px;
+    background: rgba(0,0,0,.5); color: white;
+    border-radius: 5px; padding: 2px 6px; font-size: .65rem; font-weight: 700;
+  }
+  .empty-state { text-align: center; padding: 60px 20px; color: var(--text-muted); }
+  .empty-state .big { font-size: 3rem; margin-bottom: 12px; }
+
+  /* ===== ACTION BAR ===== */
+  .action-bar {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: var(--text); color: white;
+    padding: 12px 20px; border-radius: 50px;
+    display: none; align-items: center; gap: 12px;
+    box-shadow: 0 8px 30px rgba(0,0,0,.25); z-index: 200;
+    font-size: .875rem;
+  }
+  .action-bar.show { display: flex; }
+  .action-bar .count { background: var(--accent); border-radius: 50px; padding: 2px 10px; font-weight: 700; }
+  .action-bar .divider { width: 1px; height: 20px; background: rgba(255,255,255,.2); }
+  .action-btn {
+    display: flex; align-items: center; gap: 5px;
+    cursor: pointer; padding: 5px 12px; border-radius: 50px;
+    transition: background .15s; font-size: .78rem; font-weight: 600;
+    border: none; background: transparent; color: white; font-family: inherit;
+  }
+  .action-btn:hover { background: rgba(255,255,255,.15); }
+
+  /* ===== MODAL ===== */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,.6);
+    z-index: 300; display: none; align-items: center; justify-content: center;
+    padding: 20px;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal {
+    background: var(--surface); border-radius: 18px;
+    max-width: 680px; width: 100%;
+    max-height: 90vh; overflow-y: auto;
+    padding: 28px; box-shadow: 0 20px 60px rgba(0,0,0,.25);
+  }
+  .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .modal-header h2 { font-size: 1.2rem; }
+  .modal-close { font-size: 1.4rem; cursor: pointer; color: var(--text-muted); border: none; background: none; line-height: 1; }
+
+  /* ===== EDIT TOOLS MODAL ===== */
+  .tools-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 12px; margin-bottom: 20px;
+  }
+  .tool-card {
+    border: 1.5px solid var(--border); border-radius: 12px;
+    padding: 16px; cursor: pointer; transition: all .15s;
+    text-decoration: none; display: block;
+  }
+  .tool-card:hover { border-color: var(--accent); background: #fdf8f2; }
+  .tool-card .tool-icon { font-size: 1.8rem; margin-bottom: 8px; }
+  .tool-card .tool-name { font-size: .9rem; font-weight: 700; color: var(--text); margin-bottom: 3px; }
+  .tool-card .tool-desc { font-size: .75rem; color: var(--text-muted); }
+  .tool-card .tool-free { font-size: .65rem; background: #e8f5e9; color: #2e7d32; padding: 2px 7px; border-radius: 10px; display: inline-block; margin-top: 5px; font-weight: 600; }
+
+  /* ===== VIDEO TOOLS ===== */
+  .video-section { margin-bottom: 20px; }
+  .video-section h3 { font-size: .95rem; font-weight: 700; margin-bottom: 12px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .5px; font-size: .75rem; }
+  .video-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+  .video-item {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--bg); border-radius: 8px; padding: 8px 12px;
+    font-size: .825rem;
+  }
+  .video-item .vi-icon { font-size: 1.2rem; }
+  .video-item .vi-name { flex: 1; font-weight: 600; }
+  .video-item .vi-duration { color: var(--text-muted); font-size: .75rem; }
+  .video-item .vi-remove { cursor: pointer; color: var(--danger); font-size: .8rem; border: none; background: none; padding: 2px 6px; }
+  .drag-handle { cursor: grab; color: var(--text-muted); }
+
+  .transition-picker { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+  .trans-btn {
+    padding: 6px 14px; border-radius: 8px; font-size: .78rem; font-weight: 600;
+    border: 1.5px solid var(--border); cursor: pointer; background: var(--surface);
+    color: var(--text); transition: all .15s; font-family: inherit;
+  }
+  .trans-btn.active { background: var(--accent); border-color: var(--accent); color: white; }
+
+  .caption-area {
+    background: var(--bg); border-radius: 10px; padding: 12px;
+    margin-bottom: 16px;
+  }
+  .caption-area label { font-size: .78rem; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 6px; }
+  .caption-area input {
+    width: 100%; padding: 8px 10px; border-radius: 6px;
+    border: 1.5px solid var(--border); font-family: inherit;
+    font-size: .85rem; background: white;
+  }
+  .caption-style { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+  .cap-style-btn {
+    padding: 4px 10px; font-size: .72rem; font-weight: 700;
+    border-radius: 6px; border: 1.5px solid var(--border);
+    cursor: pointer; background: var(--surface); font-family: inherit;
+    transition: all .15s;
+  }
+  .cap-style-btn.active { background: var(--text); color: white; border-color: var(--text); }
+
+  /* ===== POST COPY MODAL ===== */
+  .post-type-toggle { display: flex; gap: 0; margin-bottom: 20px; border-radius: 10px; overflow: hidden; border: 1.5px solid var(--border); }
+  .post-type-btn {
+    flex: 1; padding: 10px; text-align: center; cursor: pointer;
+    font-size: .875rem; font-weight: 700; transition: all .15s;
+    border: none; background: var(--bg); font-family: inherit;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .post-type-btn.active.organic { background: var(--tag-organic); color: white; }
+  .post-type-btn.active.paid { background: var(--tag-paid); color: white; }
+
+  .form-row { margin-bottom: 14px; }
+  .form-row label { display: block; font-size: .78rem; font-weight: 700; color: var(--text-muted); margin-bottom: 5px; }
+  .form-row input, .form-row select, .form-row textarea {
+    width: 100%; padding: 9px 12px; border-radius: 8px;
+    border: 1.5px solid var(--border); font-family: inherit;
+    font-size: .875rem; background: white; transition: border .15s;
+  }
+  .form-row input:focus, .form-row select:focus, .form-row textarea:focus {
+    outline: none; border-color: var(--accent);
+  }
+  .form-row textarea { resize: vertical; min-height: 80px; }
+  .form-row .hint { font-size: .7rem; color: var(--text-muted); margin-top: 3px; }
+
+  .generated-post {
+    background: var(--bg); border-radius: 12px; padding: 16px;
+    margin-top: 16px; font-size: .875rem; line-height: 1.6;
+    border: 1.5px solid var(--border); white-space: pre-wrap;
+    direction: rtl;
+  }
+  .post-actions { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+
+  /* ===== STYLE REFERENCE ===== */
+  .style-ref-intro { color: var(--text-muted); font-size: .875rem; margin-bottom: 16px; }
+  .style-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .style-post {
+    background: var(--surface); border-radius: 10px; overflow: hidden;
+    border: 1.5px solid var(--border);
+  }
+  .style-post .sp-thumb {
+    aspect-ratio: 1; background: linear-gradient(135deg, #f0e9e0, #e0d5c8);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem;
+  }
+  .style-post .sp-caption { padding: 8px; font-size: .7rem; color: var(--text-muted); }
+  .ig-link {
+    display: inline-flex; align-items: center; gap: 6px;
+    color: var(--accent-dark); font-weight: 700; font-size: .875rem;
+    text-decoration: none; margin-bottom: 16px;
+  }
+  .ig-link:hover { text-decoration: underline; }
+
+  .tag { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: .72rem; font-weight: 700; }
+  .tag-organic { background: #e8f5e9; color: var(--tag-organic); }
+  .tag-paid { background: #e8eaf6; color: var(--tag-paid); }
+
+  /* ===== HISTORY ===== */
+  .history-list { display: flex; flex-direction: column; gap: 10px; }
+  .history-item {
+    background: var(--surface); border-radius: 12px; padding: 14px 16px;
+    border: 1.5px solid var(--border);
+  }
+  .history-item .hi-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .history-item .hi-title { font-weight: 700; font-size: .875rem; flex: 1; }
+  .history-item .hi-date { font-size: .72rem; color: var(--text-muted); }
+  .history-item .hi-body { font-size: .825rem; color: var(--text-muted); line-height: 1.5; direction: rtl; }
+  .history-item .hi-actions { margin-top: 8px; display: flex; gap: 6px; }
+
+  /* Notification */
+  .notif {
+    position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+    background: var(--text); color: white; padding: 10px 20px;
+    border-radius: 50px; font-size: .825rem; z-index: 500;
+    opacity: 0; transition: opacity .3s; pointer-events: none;
+  }
+  .notif.show { opacity: 1; }
+
+  /* Loading spinner */
+  .spinner { display: inline-block; width: 20px; height: 20px; border: 2px solid rgba(255,255,255,.3); border-radius: 50%; border-top-color: white; animation: spin .6s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    main { padding: 16px; }
+    .tools-grid { grid-template-columns: 1fr; }
+    .style-grid { grid-template-columns: repeat(2, 1fr); }
+    header { padding: 0 16px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">ליבנת סטודיו <span>| ניהול תוכן</span></div>
+  <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">+ העלאה</button>
+</header>
+
+<main>
+  <!-- Upload Zone -->
+  <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+    <div class="icon">📁</div>
+    <h3>גרור תמונות או סרטונים לכאן</h3>
+    <p>תומך ב־JPG, PNG, MP4, MOV, HEIC · לחץ לבחירה</p>
+    <input type="file" id="fileInput" multiple accept="image/*,video/*" onchange="handleFiles(this.files)">
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('gallery', this)">🖼 גלריה</button>
+    <button class="tab" onclick="switchTab('posts', this)">✍️ פוסטים</button>
+    <button class="tab" onclick="switchTab('style', this)">💡 סגנון</button>
+    <button class="tab" onclick="switchTab('grow', this)">🚀 קידום</button>
+  </div>
+
+  <!-- Gallery Tab -->
+  <div id="tab-gallery" class="tab-content active">
+    <div class="projects-header">
+      <h2>מדיה (<span id="mediaCount">0</span>)</h2>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-ghost btn-sm" onclick="selectAll()">בחר הכל</button>
+        <button class="btn btn-ghost btn-sm" onclick="clearSelection()">בטל בחירה</button>
+      </div>
+    </div>
+    <div class="grid" id="mediaGrid">
+      <div class="empty-state" id="emptyState" style="grid-column:1/-1">
+        <div class="big">📸</div>
+        <p>עדיין לא הועלו קבצים</p>
+        <p style="font-size:.75rem;margin-top:4px;">העלה תמונות וסרטונים מהפרויקטים שלך</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Posts Tab -->
+  <div id="tab-posts" class="tab-content">
+    <div class="projects-header">
+      <h2>היסטוריית פוסטים</h2>
+      <button class="btn btn-primary btn-sm" onclick="openPostModal(null)">+ פוסט חדש</button>
+    </div>
+    <div id="historyList" class="history-list">
+      <div class="empty-state">
+        <div class="big">✍️</div>
+        <p>עוד לא נכתבו פוסטים</p>
+        <p style="font-size:.75rem;margin-top:4px;">לחץ "פוסט חדש" או בחר מדיה מהגלריה</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Style Reference Tab -->
+  <div id="tab-style" class="tab-content">
+
+    <!-- Social Feed Tabs -->
+    <div style="display:flex;gap:8px;margin-bottom:20px;">
+      <button class="btn btn-primary" onclick="showFeed('fb',this)" id="fbBtn">📘 פייסבוק</button>
+      <button class="btn btn-ghost" onclick="showFeed('ig',this)" id="igBtn">📸 אינסטגרם</button>
+      <button class="btn btn-ghost" onclick="showFeed('brand',this)" id="brandBtn">📌 קו מותג</button>
+    </div>
+
+    <!-- Facebook Feed -->
+    <div id="feed-fb">
+      <p class="style-ref-intro" style="margin-bottom:14px;">פיד פייסבוק חי של ליבנת — ראה פוסטים אחרונים לפני שכותב פוסט חדש.</p>
+      <div style="display:flex;justify-content:center;">
+        <iframe
+          src="https://www.facebook.com/plugins/page.php?href=https%3A%2F%2Fwww.facebook.com%2Fprofile.php%3Fid%3D61565649749326&tabs=timeline&width=500&height=600&small_header=true&adapt_container_width=true&hide_cover=false&show_facepile=false"
+          width="500" height="600"
+          style="border:none;overflow:hidden;border-radius:12px;max-width:100%;width:100%;"
+          scrolling="no" frameborder="0" allowfullscreen="true"
+          allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share">
+        </iframe>
+      </div>
+      <p style="font-size:.72rem;color:var(--text-muted);text-align:center;margin-top:10px;">
+        לא רואה את הפיד? <a href="https://www.facebook.com/profile.php?id=61565649749326" target="_blank" style="color:var(--accent-dark);">לחץ לפתוח בפייסבוק</a>
+      </p>
+    </div>
+
+    <!-- Instagram Feed -->
+    <div id="feed-ig" style="display:none;">
+      <p class="style-ref-intro" style="margin-bottom:14px;">לחץ כדי לפתוח את עמוד האינסטגרם של ליבנת — ראה פוסטים ורילס אחרונים.</p>
+      <div style="background:var(--surface);border-radius:14px;border:1.5px solid var(--border);overflow:hidden;">
+        <!-- Instagram Profile Header Mockup -->
+        <div style="padding:20px;display:flex;align-items:center;gap:16px;border-bottom:1px solid var(--border);">
+          <div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#f58529,#dd2a7b,#8134af);display:flex;align-items:center;justify-content:center;font-size:1.4rem;color:white;">L</div>
+          <div>
+            <div style="font-weight:700;font-size:.95rem;">livnat_benizri</div>
+            <div style="font-size:.78rem;color:var(--text-muted);">מעצבת פנים | עיצוב + שיפוצים</div>
+          </div>
+          <a href="https://www.instagram.com/livnat_benizri/" target="_blank" class="btn btn-primary btn-sm" style="margin-right:auto;">פתח עמוד ←</a>
+        </div>
+        <div style="padding:16px;">
+          <p style="font-size:.825rem;color:var(--text-muted);margin-bottom:12px;">פוסטים שליבנת אוהבת (לסגנון):</p>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <a href="https://www.instagram.com/reel/DGGmnYgo7BS/" target="_blank" style="display:flex;align-items:center;gap:8px;padding:8px;background:var(--bg);border-radius:8px;text-decoration:none;color:var(--text);">
+              <span style="font-size:1.2rem;">▶️</span>
+              <span style="font-size:.8rem;">רילס השראה — סגנון עיצוב</span>
+              <span style="margin-right:auto;font-size:.72rem;color:var(--text-muted);">instagram.com ↗</span>
+            </a>
+            <a href="https://www.instagram.com/p/DGdbKCnNYZ2/" target="_blank" style="display:flex;align-items:center;gap:8px;padding:8px;background:var(--bg);border-radius:8px;text-decoration:none;color:var(--text);">
+              <span style="font-size:1.2rem;">🖼️</span>
+              <span style="font-size:.8rem;">פוסט תמונה — השראת עיצוב</span>
+              <span style="margin-right:auto;font-size:.72rem;color:var(--text-muted);">instagram.com ↗</span>
+            </a>
+            <a href="https://www.instagram.com/p/DFu3pNmiPGy/" target="_blank" style="display:flex;align-items:center;gap=8px;padding:8px;background:var(--bg);border-radius:8px;text-decoration:none;color:var(--text);">
+              <span style="font-size:1.2rem;">🏠</span>
+              <span style="font-size:.8rem;">פרויקט עיצוב פנים</span>
+              <span style="margin-right:auto;font-size:.72rem;color:var(--text-muted);">instagram.com ↗</span>
+            </a>
+            <a href="https://www.instagram.com/p/DGcCHldtgU1/" target="_blank" style="display:flex;align-items:center;gap:8px;padding:8px;background:var(--bg);border-radius:8px;text-decoration:none;color:var(--text);">
+              <span style="font-size:1.2rem;">✨</span>
+              <span style="font-size:.8rem;">פוסט נוסף לסגנון</span>
+              <span style="margin-right:auto;font-size:.72rem;color:var(--text-muted);">instagram.com ↗</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Brand Guide -->
+    <div id="feed-brand" style="display:none;">
+      <!-- Identity -->
+      <div style="background:var(--surface);border-radius:12px;border:1.5px solid var(--border);padding:20px;margin-bottom:14px;">
+        <p style="font-size:.95rem;font-weight:700;margin-bottom:14px;">👤 פרופיל המותג — ליבנת בניזרי</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+          <div style="background:var(--bg);border-radius:10px;padding:12px;">
+            <p style="font-size:.68rem;font-weight:700;color:var(--accent-dark);margin-bottom:5px;text-transform:uppercase;">זהות</p>
+            <p style="font-size:.8rem;line-height:1.6;">מעצבת פנים + שיפוצים<br>10+ שנות ניסיון<br>נשואה, אמא ל-3</p>
+          </div>
+          <div style="background:var(--bg);border-radius:10px;padding:12px;">
+            <p style="font-size:.68rem;font-weight:700;color:var(--accent-dark);margin-bottom:5px;text-transform:uppercase;">ייחוד מוחלט</p>
+            <p style="font-size:.8rem;line-height:1.6;">ידע בחומר השחור בבנייה — לא רק מעצבת, גם פיקוח בשטח ממשי</p>
+          </div>
+          <div style="background:var(--bg);border-radius:10px;padding:12px;">
+            <p style="font-size:.68rem;font-weight:700;color:var(--accent-dark);margin-bottom:5px;text-transform:uppercase;">קהל יעד</p>
+            <p style="font-size:.8rem;line-height:1.6;">משפחות לפני שיפוץ<br>בעלי דירה חדשה<br>מי שפוחד מקבלנים</p>
+          </div>
+          <div style="background:var(--bg);border-radius:10px;padding:12px;">
+            <p style="font-size:.68rem;font-weight:700;color:var(--accent-dark);margin-bottom:5px;text-transform:uppercase;">שירותים</p>
+            <p style="font-size:.8rem;line-height:1.6;">ליווי מלא<br>ייעוץ קלאסי<br>ייעוץ פרימיום (תוכניות לקבלן)</p>
+          </div>
+        </div>
+
+        <!-- Tone rules -->
+        <p style="font-size:.8rem;font-weight:700;margin-bottom:8px;color:var(--text-muted);">🎙️ כללי טון — ממה שראינו בפוסטים האמיתיים</p>
+        <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px;">
+          <div style="display:flex;align-items:flex-start;gap:8px;font-size:.8rem;background:var(--bg);padding:8px 10px;border-radius:8px;">
+            <span style="color:var(--tag-organic);font-weight:700;flex-shrink:0;">✓</span>
+            <span>מספרת סיפור בגוף ראשון — "הגעתי, ישבתי עם הקבלן, וידאגתי שהכול יישב בול"</span>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:8px;font-size:.8rem;background:var(--bg);padding:8px 10px;border-radius:8px;">
+            <span style="color:var(--tag-organic);font-weight:700;flex-shrink:0;">✓</span>
+            <span>CTA תמיד רך — "כתבו לי הודעה" / "שלחו לי מסר" — לעולם לא מספר טלפון בפוסט</span>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:8px;font-size:.8rem;background:var(--bg);padding:8px 10px;border-radius:8px;">
+            <span style="color:var(--tag-organic);font-weight:700;flex-shrink:0;">✓</span>
+            <span>משתמשת בכאב של הקהל — פחד מקבלנים, טעויות יקרות, שיפוץ מבלבל</span>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:8px;font-size:.8rem;background:var(--bg);padding:8px 10px;border-radius:8px;">
+            <span style="color:var(--tag-organic);font-weight:700;flex-shrink:0;">✓</span>
+            <span>אמוג'י — כן, אבל לא יותר מ-3 בפוסט. 😊 🤍 ✨ 🙏 🔥 — הכי נפוצים</span>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:8px;font-size:.8rem;background:#fff0f0;padding:8px 10px;border-radius:8px;">
+            <span style="color:var(--danger);font-weight:700;flex-shrink:0;">✗</span>
+            <span>לא כותבת מחירים בפוסטים</span>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:8px;font-size:.8rem;background:#fff0f0;padding:8px 10px;border-radius:8px;">
+            <span style="color:var(--danger);font-weight:700;flex-shrink:0;">✗</span>
+            <span>לא מספר טלפון — רק WhatsApp בביו</span>
+          </div>
+        </div>
+
+        <!-- Power phrases -->
+        <p style="font-size:.8rem;font-weight:700;margin-bottom:8px;color:var(--text-muted);">💬 משפטי מפתח שעובדים לה</p>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <div style="background:white;padding:8px 12px;border-radius:8px;font-size:.8rem;border-right:3px solid var(--accent);cursor:pointer;" onclick="copyPhrase(this)">"אני לא רק מעצבת — אני מחזיקה את כל הפרויקט" 📋</div>
+          <div style="background:white;padding:8px 12px;border-radius:8px;font-size:.8rem;border-right:3px solid var(--accent);cursor:pointer;" onclick="copyPhrase(this)">"כשיש תכנון נכון — האור, הצבע, הריהוט — הכול מתחבר ומרגיש בול" 📋</div>
+          <div style="background:white;padding:8px 12px;border-radius:8px;font-size:.8rem;border-right:3px solid var(--accent);cursor:pointer;" onclick="copyPhrase(this)">"בית מעוצב זה לא מותרות — זה נוחות שמרגישים כל יום" 📋</div>
+          <div style="background:white;padding:8px 12px;border-radius:8px;font-size:.8rem;border-right:3px solid var(--accent);cursor:pointer;" onclick="copyPhrase(this)">"פחדים מקבלנים, מחומרים, מטעויות יקרות? בדיוק בשביל זה אני כאן" 📋</div>
+          <div style="background:white;padding:8px 12px;border-radius:8px;font-size:.8rem;border-right:3px solid var(--accent);cursor:pointer;" onclick="copyPhrase(this)">"מהתכנון על הנייר ועד הפרט האחרון בשטח — אני שם" 📋</div>
+        </div>
+        <p style="font-size:.68rem;color:var(--text-muted);margin-top:8px;">לחץ על משפט להעתקה</p>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+  <!-- Grow Tab -->
+  <div id="tab-grow" class="tab-content">
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px;">
+      <!-- Posting frequency -->
+      <div style="background:var(--surface);border-radius:14px;border:1.5px solid var(--border);padding:18px;grid-column:1/-1;">
+        <p style="font-weight:700;font-size:.95rem;margin-bottom:4px;">📅 כמה פוסטים לפרסם?</p>
+        <p style="font-size:.78rem;color:var(--text-muted);margin-bottom:12px;">עבור עיצוב פנים — עקביות חשובה יותר מכמות</p>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+          <div style="background:#e8f5e9;border-radius:10px;padding:12px;text-align:center;">
+            <p style="font-size:1.3rem;font-weight:700;color:var(--tag-organic);">3–4</p>
+            <p style="font-size:.72rem;color:var(--tag-organic);font-weight:600;">פוסטים / שבוע</p>
+            <p style="font-size:.7rem;color:var(--text-muted);margin-top:4px;">אינסטגרם + פייסבוק</p>
+          </div>
+          <div style="background:#e3f2fd;border-radius:10px;padding:12px;text-align:center;">
+            <p style="font-size:1.3rem;font-weight:700;color:#1565c0;">2–3</p>
+            <p style="font-size:.72rem;color:#1565c0;font-weight:600;">רילס / שבוע</p>
+            <p style="font-size:.7rem;color:var(--text-muted);margin-top:4px;">הכי חשוב לצמיחה</p>
+          </div>
+          <div style="background:#fff8e1;border-radius:10px;padding:12px;text-align:center;">
+            <p style="font-size:1.3rem;font-weight:700;color:#e65100;">1</p>
+            <p style="font-size:.72rem;color:#e65100;font-weight:600;">סטורי ביום</p>
+            <p style="font-size:.7rem;color:var(--text-muted);margin-top:4px;">שומר על נוכחות</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Content mix -->
+      <div style="background:var(--surface);border-radius:14px;border:1.5px solid var(--border);padding:18px;">
+        <p style="font-weight:700;font-size:.9rem;margin-bottom:12px;">🎯 מה לפרסם — תמהיל מומלץ</p>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:36px;height-36px;background:#e8f5e9;border-radius:8px;padding:6px;font-size:1rem;text-align:center;">🏠</div>
+            <div>
+              <p style="font-size:.8rem;font-weight:700;">40% — פרויקטים גמורים</p>
+              <p style="font-size:.7rem;color:var(--text-muted);">תמונות/רילס לפני-אחרי</p>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="background:#e3f2fd;border-radius:8px;padding:6px;font-size:1rem;text-align:center;">🎬</div>
+            <div>
+              <p style="font-size:.8rem;font-weight:700;">30% — תהליך + סיור בבית</p>
+              <p style="font-size:.7rem;color:var(--text-muted);">רילס של בנייה, בחירת חומרים, שטח</p>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="background:#f3e5f5;border-radius:8px;padding:6px;font-size:1rem;text-align:center;">💬</div>
+            <div>
+              <p style="font-size:.8rem;font-weight:700;">20% — טיפים מקצועיים</p>
+              <p style="font-size:.7rem;color:var(--text-muted);">"3 טעויות בשיפוץ שאפשר להימנע"</p>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="background:#fff8e1;border-radius:8px;padding:6px;font-size:1rem;text-align:center;">🙋</div>
+            <div>
+              <p style="font-size:.8rem;font-weight:700;">10% — אישי / מאחורי הקלעים</p>
+              <p style="font-size:.7rem;color:var(--text-muted);">יום בחיים, פגישה עם לקוח</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Best times -->
+      <div style="background:var(--surface);border-radius:14px;border:1.5px solid var(--border);padding:18px;">
+        <p style="font-weight:700;font-size:.9rem;margin-bottom:12px;">⏰ שעות עדיפות לפרסום</p>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div style="background:var(--bg);border-radius:8px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:.8rem;font-weight:700;">☕ 07:00–09:00</span>
+            <span style="font-size:.72rem;color:var(--text-muted);">בוקר — הכי טוב</span>
+          </div>
+          <div style="background:var(--bg);border-radius:8px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:.8rem;font-weight:700;">🌞 12:00–13:00</span>
+            <span style="font-size:.72rem;color:var(--text-muted);">צהריים — טוב</span>
+          </div>
+          <div style="background:var(--bg);border-radius:8px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:.8rem;font-weight:700;">🌆 19:00–21:00</span>
+            <span style="font-size:.72rem;color:var(--text-muted);">ערב — הכי טוב לרילס</span>
+          </div>
+          <div style="background:#fff0f0;border-radius:8px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:.8rem;font-weight:700;">🚫 שישי אחה"צ</span>
+            <span style="font-size:.72rem;color:var(--danger);">הימנע</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Reels tips -->
+    <div style="background:var(--surface);border-radius:14px;border:1.5px solid var(--border);padding:18px;margin-bottom:14px;">
+      <p style="font-weight:700;font-size:.95rem;margin-bottom:4px;">🎬 רילס — הכלי הכי חזק לצמיחה</p>
+      <p style="font-size:.78rem;color:var(--text-muted);margin-bottom:14px;">אינסטגרם מעדיף רילס על פני תמונות — כל רילס מגיע לאנשים חדשים</p>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div style="background:var(--bg);border-radius:10px;padding:12px;display:flex;gap:10px;">
+          <span style="font-size:1.1rem;flex-shrink:0;">⏱️</span>
+          <div>
+            <p style="font-size:.82rem;font-weight:700;margin-bottom:2px;">אורך אידיאלי: 15–30 שניות</p>
+            <p style="font-size:.73rem;color:var(--text-muted);">הצג תוצאה מרשימה מהר — הקהל מחליט תוך 3 שניות אם להמשיך</p>
+          </div>
+        </div>
+        <div style="background:var(--bg);border-radius:10px;padding:12px;display:flex;gap:10px;">
+          <span style="font-size:1.1rem;flex-shrink:0;">🎵</span>
+          <div>
+            <p style="font-size:.82rem;font-weight:700;margin-bottom:2px;">מוזיקה טרנדית</p>
+            <p style="font-size:.73rem;color:var(--text-muted);">השתמשי בשירים טרנדיים שאינסטגרם מציעה — מגדיל חשיפה משמעותית</p>
+          </div>
+        </div>
+        <div style="background:var(--bg);border-radius:10px;padding:12px;display:flex;gap:10px;">
+          <span style="font-size:1.1rem;flex-shrink:0;">📝</span>
+          <div>
+            <p style="font-size:.82rem;font-weight:700;margin-bottom:2px;">טקסט על הסרטון</p>
+            <p style="font-size:.73rem;color:var(--text-muted);">תמיד הוסיפי כיתוב — הרבה צופים רואים בלי קול</p>
+          </div>
+        </div>
+        <div style="background:var(--bg);border-radius:10px;padding:12px;display:flex;gap:10px;">
+          <span style="font-size:1.1rem;flex-shrink:0;">🪝</span>
+          <div>
+            <p style="font-size:.82rem;font-weight:700;margin-bottom:2px;">פתיחה חזקה — ה-Hook</p>
+            <p style="font-size:.73rem;color:var(--text-muted);">דוגמאות שעובדות: "לפני ואחרי שיפוץ 🔥" / "זו הטעות הכי נפוצה בעיצוב פנים 👇" / "כך נראה הסלון לפני..."</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hashtag strategy -->
+    <div style="background:var(--surface);border-radius:14px;border:1.5px solid var(--border);padding:18px;margin-bottom:14px;">
+      <p style="font-weight:700;font-size:.95rem;margin-bottom:4px;">#️⃣ אסטרטגיית האשטאגים</p>
+      <p style="font-size:.78rem;color:var(--text-muted);margin-bottom:14px;">10–15 האשטאגים לפוסט — שילוב של גדולים, בינוניים וקטנים</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px;">
+        <div style="background:#e8f5e9;border-radius:8px;padding:10px;">
+          <p style="font-size:.68rem;font-weight:700;color:var(--tag-organic);margin-bottom:6px;">גדולים (נוכחות)</p>
+          <p style="font-size:.72rem;line-height:1.8;">#עיצובפנים<br>#מעצבתפנים<br>#שיפוץבית<br>#בית</p>
+        </div>
+        <div style="background:#e3f2fd;border-radius:8px;padding:10px;">
+          <p style="font-size:.68rem;font-weight:700;color:#1565c0;margin-bottom:6px;">בינוניים (מטרה)</p>
+          <p style="font-size:.72rem;line-height:1.8;">#עיצוב_פנים<br>#ליווי_מלא<br>#לפניואחרי<br>#בית_חלומות</p>
+        </div>
+        <div style="background:#fff8e1;border-radius:8px;padding:10px;">
+          <p style="font-size:.68rem;font-weight:700;color:#e65100;margin-bottom:6px;">קטנים (חשיפה)</p>
+          <p style="font-size:.72rem;line-height:1.8;">#ליבנת_בניזרי<br>#מעצבת_פנים_ישראל<br>#שיפוץ_[עיר]<br>#עיצוב_[חדר]</p>
+        </div>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="copyHashtags()">📋 העתק סט האשטאגים מומלץ</button>
+    </div>
+
+    <!-- Story tips -->
+    <div style="background:var(--surface);border-radius:14px;border:1.5px solid var(--border);padding:18px;margin-bottom:14px;">
+      <p style="font-weight:700;font-size:.95rem;margin-bottom:14px;">📲 סטוריז — שומרים על קשר יומי</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div style="background:var(--bg);border-radius:10px;padding:12px;">
+          <p style="font-size:.78rem;font-weight:700;margin-bottom:5px;">🗳️ סקרים</p>
+          <p style="font-size:.72rem;color:var(--text-muted);">"איזה סגנון מטבח אתם מעדיפים? A vs B" — מגדיל מעורבות ואלגוריתם</p>
+        </div>
+        <div style="background:var(--bg);border-radius:10px;padding:12px;">
+          <p style="font-size:.78rem;font-weight:700;margin-bottom:5px;">❓ שאלות פתוחות</p>
+          <p style="font-size:.72rem;color:var(--text-muted);">"שלחו לי תמונה של הסלון — אתן 3 טיפים חינם"</p>
+        </div>
+        <div style="background:var(--bg);border-radius:10px;padding:12px;">
+          <p style="font-size:.78rem;font-weight:700;margin-bottom:5px;">🏗️ תהליך בשטח</p>
+          <p style="font-size:.72rem;color:var(--text-muted);">צלמי 10 שניות מהשטח בכל ביקור — מראה מקצועיות ואמינות</p>
+        </div>
+        <div style="background:var(--bg);border-radius:10px;padding:12px;">
+          <p style="font-size:.78rem;font-weight:700;margin-bottom:5px;">⭐ המלצות לקוחות</p>
+          <p style="font-size:.72rem;color:var(--text-muted);">שתפי וואטסאפ/הודעות של לקוחות מרוצים (בהסכמה)</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Paid ads quick guide -->
+    <div style="background:linear-gradient(135deg,#667eea15,#764ba215);border-radius:14px;border:1.5px solid #c5cae9;padding:18px;">
+      <p style="font-weight:700;font-size:.95rem;margin-bottom:4px;">💰 מודעות ממומנות — מתי ואיך</p>
+      <p style="font-size:.78rem;color:var(--text-muted);margin-bottom:14px;">גם תקציב קטן יכול להביא לידים אם עושים נכון</p>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div style="background:white;border-radius:10px;padding:12px;">
+          <p style="font-size:.82rem;font-weight:700;margin-bottom:3px;">מינימום להתחיל: 30–50 ₪ ביום</p>
+          <p style="font-size:.72rem;color:var(--text-muted);">ממקד לרדיוס של 20 ק"מ סביב האזור שלך, גיל 28–55</p>
+        </div>
+        <div style="background:white;border-radius:10px;padding:12px;">
+          <p style="font-size:.82rem;font-weight:700;margin-bottom:3px;">הכי מומלץ: Boost לרילס שכבר עבד אורגנית</p>
+          <p style="font-size:.72rem;color:var(--text-muted);">פוסט שקיבל מעורבות טובה — הפוך אותו למודעה. עלות נמוכה, תוצאות גבוהות</p>
+        </div>
+        <div style="background:white;border-radius:10px;padding:12px;">
+          <p style="font-size:.82rem;font-weight:700;margin-bottom:3px;">מטרת מודעה מומלצת: "הודעות" (לא "לייקים")</p>
+          <p style="font-size:.72rem;color:var(--text-muted);">רוצים לידים — תכוונו לכפתור "שלח הודעה לוואטסאפ" עם כפתור מובנה</p>
+        </div>
+        <a class="btn btn-primary btn-sm" href="https://adsmanager.facebook.com" target="_blank" style="text-decoration:none;width:fit-content;margin-top:4px;">פתח מנהל מודעות ←</a>
+      </div>
+    </div>
+
+  </div>
+
+<!-- Action Bar (multi-select) -->
+<div class="action-bar" id="actionBar">
+  <span class="count" id="selCount">0</span> נבחרו
+  <div class="divider"></div>
+  <button class="action-btn" onclick="openEditModal()">✏️ ערוך תמונות</button>
+  <button class="action-btn" onclick="openVideoModal()">🎬 מזג סרטונים</button>
+  <button class="action-btn" onclick="openPostModal('selected')">✍️ כתוב פוסט</button>
+  <div class="divider"></div>
+  <button class="action-btn" onclick="deleteSelected()" style="color:#ff6b6b;">🗑️</button>
+</div>
+
+<!-- ======== EDIT MODAL ======== -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>✏️ עריכת תמונות ב־AI</h2>
+      <button class="modal-close" onclick="closeModal('editModal')">✕</button>
+    </div>
+    <p style="font-size:.825rem;color:var(--text-muted);margin-bottom:16px;">בחר כלי — הוא ייפתח בטאב חדש. הורד את התמונה הגמורה ותחזור להעלות אותה.</p>
+    <div class="tools-grid">
+      <a class="tool-card" href="https://www.canva.com/photo-editor/" target="_blank">
+        <div class="tool-icon">🎨</div>
+        <div class="tool-name">Canva</div>
+        <div class="tool-desc">עריכה כללית, טקסט, לוגו, פילטרים, רקעים</div>
+        <span class="tool-free">חינם</span>
+      </a>
+      <a class="tool-card" href="https://www.remove.bg" target="_blank">
+        <div class="tool-icon">✂️</div>
+        <div class="tool-name">Remove.bg</div>
+        <div class="tool-desc">הסרת רקע אוטומטית בלחיצה</div>
+        <span class="tool-free">חינם</span>
+      </a>
+      <a class="tool-card" href="https://clipdrop.co/relight" target="_blank">
+        <div class="tool-icon">💡</div>
+        <div class="tool-name">Clipdrop — Relight</div>
+        <div class="tool-desc">שינוי תאורה בצילומי חדרים — מושלם לעיצוב פנים</div>
+        <span class="tool-free">חינם</span>
+      </a>
+      <a class="tool-card" href="https://clipdrop.co/cleanup" target="_blank">
+        <div class="tool-icon">🧹</div>
+        <div class="tool-name">Clipdrop — Cleanup</div>
+        <div class="tool-desc">מחיקת אובייקטים לא רצויים מהתמונה</div>
+        <span class="tool-free">חינם</span>
+      </a>
+      <a class="tool-card" href="https://www.adobe.com/express/feature/image/editor" target="_blank">
+        <div class="tool-icon">🔵</div>
+        <div class="tool-name">Adobe Express</div>
+        <div class="tool-desc">עריכה מקצועית + תבניות לרשתות חברתיות</div>
+        <span class="tool-free">חינם</span>
+      </a>
+      <a class="tool-card" href="https://letsenhance.io" target="_blank">
+        <div class="tool-icon">🔍</div>
+        <div class="tool-name">Let's Enhance</div>
+        <div class="tool-desc">שיפור איכות ורזולוציה של תמונות מטושטשות</div>
+        <span class="tool-free">חינם</span>
+      </a>
+      <a class="tool-card" href="https://app.fotor.com/photo-editor-app/" target="_blank">
+        <div class="tool-icon">🌈</div>
+        <div class="tool-name">Fotor</div>
+        <div class="tool-desc">עריכת צבעים, בהירות, ניגודיות — מותאם לעיצוב</div>
+        <span class="tool-free">חינם</span>
+      </a>
+      <a class="tool-card" href="https://magicstudio.com/magiceraser/" target="_blank">
+        <div class="tool-icon">🪄</div>
+        <div class="tool-name">Magic Eraser</div>
+        <div class="tool-desc">מחיקת אלמנטים מהתמונה בציור</div>
+        <span class="tool-free">חינם</span>
+      </a>
+    </div>
+    <p style="font-size:.75rem;color:var(--text-muted);text-align:center;">💡 אחרי העריכה — הורד ובצע העלאה חדשה לאפליקציה</p>
+  </div>
+</div>
+
+<!-- ======== VIDEO MODAL ======== -->
+<div class="modal-overlay" id="videoModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>🎬 כלי וידאו</h2>
+      <button class="modal-close" onclick="closeModal('videoModal')">✕</button>
+    </div>
+
+    <!-- Merge Section -->
+    <div class="video-section">
+      <h3>מיזוג סרטונים</h3>
+      <div id="videoMergeList" class="video-list"></div>
+      <p style="font-size:.75rem;color:var(--text-muted);margin-bottom:10px;">סרטונים נבחרים יופיעו לפי הסדר — ניתן לגרור לשינוי סדר</p>
+    </div>
+
+    <!-- Transitions -->
+    <div class="video-section">
+      <h3>מעבר בין סרטונים</h3>
+      <div class="transition-picker">
+        <button class="trans-btn active" data-trans="none" onclick="setTransition(this)">ללא</button>
+        <button class="trans-btn" data-trans="fade" onclick="setTransition(this)">Fade</button>
+        <button class="trans-btn" data-trans="slide" onclick="setTransition(this)">Slide</button>
+        <button class="trans-btn" data-trans="zoom" onclick="setTransition(this)">Zoom In</button>
+        <button class="trans-btn" data-trans="dissolve" onclick="setTransition(this)">Dissolve</button>
+      </div>
+    </div>
+
+    <!-- Caption -->
+    <div class="caption-area">
+      <label>כיתוב / לוגו על הסרטון (אופציונלי)</label>
+      <input type="text" id="captionText" placeholder="ליבנת בניזרי | עיצוב פנים">
+      <div class="caption-style">
+        <button class="cap-style-btn active" data-style="elegant" onclick="setCapStyle(this)">אלגנטי</button>
+        <button class="cap-style-btn" data-style="bold" onclick="setCapStyle(this)">Bold</button>
+        <button class="cap-style-btn" data-style="minimal" onclick="setCapStyle(this)">מינימל</button>
+        <button class="cap-style-btn" data-style="bottom" onclick="setCapStyle(this)">תחתית</button>
+      </div>
+    </div>
+
+    <!-- Online Tools for video -->
+    <div class="video-section">
+      <h3>כלים מקוונים (חינם)</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <a class="tool-card" href="https://www.capcut.com" target="_blank" style="padding:12px;">
+          <div class="tool-icon" style="font-size:1.3rem;">✂️</div>
+          <div class="tool-name" style="font-size:.82rem;">CapCut</div>
+          <div class="tool-desc" style="font-size:.7rem;">עריכה מלאה + AI + כתוביות</div>
+          <span class="tool-free">חינם</span>
+        </a>
+        <a class="tool-card" href="https://www.veed.io" target="_blank" style="padding:12px;">
+          <div class="tool-icon" style="font-size:1.3rem;">🎞️</div>
+          <div class="tool-name" style="font-size:.82rem;">VEED.io</div>
+          <div class="tool-desc" style="font-size:.7rem;">מיזוג, כתוביות, לוגו, ייצוא</div>
+          <span class="tool-free">חינם</span>
+        </a>
+        <a class="tool-card" href="https://clideo.com/merge-videos" target="_blank" style="padding:12px;">
+          <div class="tool-icon" style="font-size:1.3rem;">🔗</div>
+          <div class="tool-name" style="font-size:.82rem;">Clideo Merge</div>
+          <div class="tool-desc" style="font-size:.7rem;">מיזוג מהיר ללא הורדה</div>
+          <span class="tool-free">חינם</span>
+        </a>
+        <a class="tool-card" href="https://www.canva.com/video-editor/" target="_blank" style="padding:12px;">
+          <div class="tool-icon" style="font-size:1.3rem;">🎬</div>
+          <div class="tool-name" style="font-size:.82rem;">Canva Video</div>
+          <div class="tool-desc" style="font-size:.7rem;">עריכה + מעברים + מוזיקה</div>
+          <span class="tool-free">חינם</span>
+        </a>
+      </div>
+    </div>
+
+    <div style="text-align:center;margin-top:8px;">
+      <p style="font-size:.75rem;color:var(--text-muted);">💡 המלצה: CapCut לרילס קצרים, VEED.io לפרויקטים ארוכים יותר</p>
+    </div>
+  </div>
+</div>
+
+<!-- ======== POST COPY MODAL ======== -->
+<div class="modal-overlay" id="postModal">
+  <div class="modal" style="max-width:720px;">
+    <div class="modal-header">
+      <h2>✍️ כתיבת פוסט</h2>
+      <button class="modal-close" onclick="closeModal('postModal')">✕</button>
+    </div>
+
+    <div class="post-type-toggle">
+      <button class="post-type-btn active organic" data-type="organic" onclick="setPostType(this)">🌱 אורגני</button>
+      <button class="post-type-btn paid" data-type="paid" onclick="setPostType(this)">💰 ממומן</button>
+    </div>
+
+    <div id="organicFields">
+      <div class="form-row">
+        <label>סוג פרויקט</label>
+        <select id="projectType">
+          <option value="">בחר...</option>
+          <option value="salon">סלון</option>
+          <option value="kitchen">מטבח</option>
+          <option value="bedroom">חדר שינה</option>
+          <option value="bathroom">חדר רחצה</option>
+          <option value="full">בית שלם</option>
+          <option value="office">משרד</option>
+          <option value="other">אחר</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>מה הכי מיוחד בפרויקט הזה?</label>
+        <textarea id="projectHighlight" placeholder="למשל: גוונים חמים, שילוב ספה קטיפה עם שיש לבן, פתרון חכם לאחסון..."></textarea>
+      </div>
+      <div class="form-row">
+        <label>פרטים על הלקוח (אופציונלי)</label>
+        <input type="text" id="clientDetails" placeholder="למשל: משפחה עם ילדים, רצו פונקציונלי ואלגנטי">
+      </div>
+      <div class="form-row">
+        <label>מיקום / עיר (אופציונלי)</label>
+        <input type="text" id="location" placeholder="למשל: תל אביב, רמת גן...">
+      </div>
+    </div>
+
+    <div id="paidFields" style="display:none;">
+      <div class="form-row">
+        <label>מטרת המודעה</label>
+        <select id="adGoal">
+          <option value="leads">לידים — השאר פרטים</option>
+          <option value="awareness">מודעות — הכר את ליבנת</option>
+          <option value="reel">צפיות ברילס</option>
+          <option value="message">שלח הודעה</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>קהל יעד</label>
+        <select id="adAudience">
+          <option value="families">משפחות עם ילדים</option>
+          <option value="couples">זוגות</option>
+          <option value="renovating">בעלי בית בשיפוץ</option>
+          <option value="new_apt">דירה חדשה</option>
+          <option value="general">כללי</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <label>מה מוצג במדיה?</label>
+        <input type="text" id="adVisual" placeholder="למשל: מטבח לפני/אחרי, סרטון סיבוב בבית">
+      </div>
+      <div class="form-row">
+        <label>הצעת ערך ייחודית</label>
+        <input type="text" id="adUsp" placeholder="ניסיון בשיפוצים / ליווי מלא / מחיר שקוף">
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px;margin-top:4px;">
+      <button class="btn btn-primary" onclick="generatePost()" id="genBtn" style="flex:1;">✨ צור פוסט</button>
+      <button class="btn btn-ghost" onclick="generatePost(true)" style="flex:0 0 auto;">🔄 גרסה נוספת</button>
+    </div>
+
+    <div id="generatedPost" style="display:none;">
+      <div class="generated-post" id="postText"></div>
+      <div class="post-actions">
+        <button class="btn btn-primary btn-sm" onclick="copyPost()">📋 העתק</button>
+        <button class="btn btn-ghost btn-sm" onclick="savePost()">💾 שמור</button>
+        <a class="btn btn-ghost btn-sm" href="https://www.facebook.com" target="_blank">📘 פתח פייסבוק</a>
+        <a class="btn btn-ghost btn-sm" href="https://www.instagram.com" target="_blank">📸 פתח אינסטגרם</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Notification -->
+<div class="notif" id="notif"></div>
+
+<script>
+// ======= STATE =======
+let mediaItems = JSON.parse(localStorage.getItem('livnat_media') || '[]');
+let postHistory = JSON.parse(localStorage.getItem('livnat_posts') || '[]');
+let selectedIds = new Set();
+let currentPostType = 'organic';
+let postVariant = 0;
+
+// ======= SAVE =======
+function saveMedia() { localStorage.setItem('livnat_media', JSON.stringify(mediaItems.map(m => ({...m, src: m.src ? m.src : null})))); }
+function savePosts() { localStorage.setItem('livnat_posts', JSON.stringify(postHistory)); }
+
+// ======= RENDER =======
+function render() {
+  const grid = document.getElementById('mediaGrid');
+  const empty = document.getElementById('emptyState');
+  document.getElementById('mediaCount').textContent = mediaItems.length;
+
+  // Remove all cards (keep empty state)
+  Array.from(grid.querySelectorAll('.media-card')).forEach(c => c.remove());
+
+  if (mediaItems.length === 0) {
+    empty.style.display = '';
+    return;
+  }
+  empty.style.display = 'none';
+
+  mediaItems.forEach(item => {
+    const card = document.createElement('div');
+    card.className = 'media-card' + (selectedIds.has(item.id) ? ' selected' : '');
+    card.dataset.id = item.id;
+    card.onclick = () => toggleSelect(item.id);
+
+    const isVideo = item.type === 'video';
+    const thumb = document.createElement('div');
+    thumb.className = 'thumb';
+
+    if (item.src === 'HEIC_UNSUPPORTED') {
+      thumb.style.cssText += 'flex-direction:column;gap:6px;padding:10px;';
+      thumb.innerHTML = `
+        <span style="font-size:1.8rem;">📷</span>
+        <span style="font-size:.68rem;font-weight:700;color:var(--text);">HEIC מהאייפון</span>
+        <span style="font-size:.62rem;color:var(--text-muted);text-align:center;line-height:1.4;">הדפדפן לא תומך.<br>
+        <a href="ms-windows-store://pdp/?productid=9PMMSR1CGPWG" style="color:var(--accent-dark);text-decoration:underline;">התקן קודק HEIC</a><br>
+        או העלה כ-JPG</span>`;
+    } else if (item.src) {
+      if (isVideo) {
+        const vid = document.createElement('video');
+        vid.src = item.src;
+        vid.style.cssText = 'width:100%;height:100%;object-fit:cover;';
+        thumb.appendChild(vid);
+      } else {
+        const img = document.createElement('img');
+        img.src = item.src;
+        img.alt = item.name;
+        img.onerror = () => {
+          img.remove();
+          thumb.style.cssText += 'flex-direction:column;gap:4px;';
+          thumb.innerHTML = '<span style="font-size:2rem;">📷</span><span style="font-size:.65rem;color:var(--text-muted);">לא ניתן להציג</span>';
+        };
+        thumb.appendChild(img);
+      }
+    } else {
+      // src is null — still converting (HEIC in progress)
+      thumb.style.cssText += 'flex-direction:column;gap:4px;';
+      thumb.innerHTML = isVideo
+        ? '<span style="font-size:2rem;">🎬</span>'
+        : '<span style="font-size:1.5rem;">⏳</span><span style="font-size:.65rem;color:var(--text-muted);">ממיר...</span>';
+    }
+
+    const badge = document.createElement('div');
+    badge.className = 'type-badge';
+    badge.textContent = isVideo ? 'VIDEO' : 'IMG';
+
+    const check = document.createElement('div');
+    check.className = 'check';
+    check.textContent = '✓';
+
+    const info = document.createElement('div');
+    info.className = 'info';
+    info.innerHTML = `<div class="name">${item.name}</div><div class="meta">${item.size || ''}</div>`;
+
+    card.appendChild(thumb);
+    card.appendChild(badge);
+    card.appendChild(check);
+    card.appendChild(info);
+    grid.appendChild(card);
+  });
+
+  updateActionBar();
+}
+
+function renderHistory() {
+  const list = document.getElementById('historyList');
+  if (postHistory.length === 0) {
+    list.innerHTML = `<div class="empty-state"><div class="big">✍️</div><p>עוד לא נכתבו פוסטים</p><p style="font-size:.75rem;margin-top:4px;">לחץ "פוסט חדש" או בחר מדיה מהגלריה</p></div>`;
+    return;
+  }
+  list.innerHTML = postHistory.map((p, i) => `
+    <div class="history-item">
+      <div class="hi-header">
+        <span class="tag ${p.type === 'organic' ? 'tag-organic' : 'tag-paid'}">${p.type === 'organic' ? '🌱 אורגני' : '💰 ממומן'}</span>
+        <span class="hi-title">${p.project || 'פוסט'}</span>
+        <span class="hi-date">${p.date}</span>
+      </div>
+      <div class="hi-body">${p.text.substring(0, 140)}${p.text.length > 140 ? '...' : ''}</div>
+      <div class="hi-actions">
+        <button class="btn btn-ghost btn-sm" onclick="copyPostById(${i})">📋 העתק</button>
+        <button class="btn btn-ghost btn-sm" onclick="deletePost(${i})" style="color:var(--danger)">🗑️</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ======= HEIC LOADER (lazy) =======
+let _heic2anyReady = null;
+function loadHeic2Any() {
+  if (_heic2anyReady) return _heic2anyReady;
+  _heic2anyReady = new Promise((resolve, reject) => {
+    if (window.heic2any) { resolve(window.heic2any); return; }
+    const s = document.createElement('script');
+    s.src = 'https://unpkg.com/heic2any@0.0.4/dist/heic2any.min.js';
+    s.onload = () => resolve(window.heic2any);
+    s.onerror = reject;
+    document.head.appendChild(s);
+  });
+  return _heic2anyReady;
+}
+
+// ======= FILE HANDLING =======
+function handleFiles(files) {
+  Array.from(files).forEach(file => {
+    const isVideo = file.type.startsWith('video/');
+    const id = Date.now() + Math.random();
+    const size = formatSize(file.size);
+    const isHeic = /\.(heic|heif)$/i.test(file.name)
+      || file.type === 'image/heic' || file.type === 'image/heif';
+
+    if (isHeic) {
+      const item = { id, name: file.name, type: 'image', size, src: null, isHeic: true };
+      mediaItems.unshift(item);
+      render();
+
+      // Step 1: try createImageBitmap (native, fast)
+      createImageBitmap(file)
+        .then(bitmap => {
+          const MAX = 800;
+          const scale = Math.min(1, MAX / Math.max(bitmap.width, bitmap.height));
+          const w = Math.round(bitmap.width * scale);
+          const h = Math.round(bitmap.height * scale);
+          const c = document.createElement('canvas');
+          c.width = w; c.height = h;
+          c.getContext('2d').drawImage(bitmap, 0, 0, w, h);
+          item.src = c.toDataURL('image/jpeg', 0.85);
+          render();
+        })
+        .catch(() => {
+          // Step 2: try heic2any
+          loadHeic2Any()
+            .then(fn => fn({ blob: file, toType: 'image/jpeg', quality: 0.85 }))
+            .then(blob => {
+              const b = Array.isArray(blob) ? blob[0] : blob;
+              item.src = URL.createObjectURL(b);
+              render();
+            })
+            .catch(() => {
+              // Step 3: final fallback — show install hint
+              item.src = 'HEIC_UNSUPPORTED';
+              render();
+            });
+        });
+    } else {
+      mediaItems.unshift({ id, name: file.name, type: isVideo ? 'video' : 'image', size, src: URL.createObjectURL(file) });
+      render();
+    }
+  });
+  notify(`${Array.from(files).length} קבצים הועלו`);
+}
+
+function formatSize(bytes) {
+  if (bytes > 1e6) return (bytes / 1e6).toFixed(1) + ' MB';
+  return (bytes / 1e3).toFixed(0) + ' KB';
+}
+
+// ======= DRAG & DROP =======
+const zone = document.getElementById('uploadZone');
+zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragging'); });
+zone.addEventListener('dragleave', () => zone.classList.remove('dragging'));
+zone.addEventListener('drop', e => { e.preventDefault(); zone.classList.remove('dragging'); handleFiles(e.dataTransfer.files); });
+
+// ======= SELECTION =======
+function toggleSelect(id) {
+  if (selectedIds.has(id)) selectedIds.delete(id);
+  else selectedIds.add(id);
+  render();
+}
+function selectAll() { mediaItems.forEach(m => selectedIds.add(m.id)); render(); }
+function clearSelection() { selectedIds.clear(); render(); }
+function deleteSelected() {
+  if (!selectedIds.size) return;
+  if (!confirm(`למחוק ${selectedIds.size} קבצים?`)) return;
+  mediaItems = mediaItems.filter(m => !selectedIds.has(m.id));
+  selectedIds.clear();
+  saveMedia();
+  render();
+  notify('נמחקו');
+}
+function updateActionBar() {
+  const bar = document.getElementById('actionBar');
+  document.getElementById('selCount').textContent = selectedIds.size;
+  bar.classList.toggle('show', selectedIds.size > 0);
+}
+
+// ======= TABS =======
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  btn.classList.add('active');
+  if (name === 'posts') renderHistory();
+}
+
+// ======= MODALS =======
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+document.querySelectorAll('.modal-overlay').forEach(m => m.addEventListener('click', e => { if (e.target === m) m.classList.remove('show'); }));
+
+function openEditModal() {
+  const imgs = mediaItems.filter(m => selectedIds.has(m.id) && m.type === 'image');
+  if (imgs.length === 0) { notify('בחר תמונות תחילה'); return; }
+  document.getElementById('editModal').classList.add('show');
+}
+
+function openVideoModal() {
+  const vids = mediaItems.filter(m => selectedIds.has(m.id) && m.type === 'video');
+  const list = document.getElementById('videoMergeList');
+  if (vids.length === 0) {
+    list.innerHTML = '<p style="font-size:.8rem;color:var(--text-muted);text-align:center;padding:10px;">לא נבחרו סרטונים. בחר סרטונים מהגלריה תחילה.</p>';
+  } else {
+    list.innerHTML = vids.map((v, i) => `
+      <div class="video-item" draggable="true">
+        <span class="drag-handle">⠿</span>
+        <span class="vi-icon">🎬</span>
+        <span class="vi-name">${v.name}</span>
+        <span class="vi-duration">${v.size}</span>
+        <button class="vi-remove" onclick="this.closest('.video-item').remove()">✕</button>
+      </div>
+    `).join('');
+  }
+  document.getElementById('videoModal').classList.add('show');
+}
+
+function openPostModal(source) {
+  document.getElementById('postModal').classList.add('show');
+  document.getElementById('generatedPost').style.display = 'none';
+}
+
+// ======= VIDEO TOOLS =======
+function setTransition(btn) {
+  document.querySelectorAll('.trans-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+function setCapStyle(btn) {
+  document.querySelectorAll('.cap-style-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// ======= POST COPY GENERATOR =======
+function setPostType(btn) {
+  document.querySelectorAll('.post-type-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentPostType = btn.dataset.type;
+  document.getElementById('organicFields').style.display = currentPostType === 'organic' ? '' : 'none';
+  document.getElementById('paidFields').style.display = currentPostType === 'paid' ? '' : 'none';
+  document.getElementById('generatedPost').style.display = 'none';
+}
+
+const projectNames = { salon: 'סלון', kitchen: 'מטבח', bedroom: 'חדר שינה', bathroom: 'חדר רחצה', full: 'בית שלם', office: 'משרד', other: 'פרויקט' };
+
+const organicTemplates = [
+  (p) => {
+    const parts = [];
+    parts.push(`יש רגעים ב${p.ptype} שאת פשוט יודעת שזה יצא בדיוק כמו שדמיינו אותו 🤍`);
+    if (p.highlight) parts.push(p.highlight);
+    parts.push(`הכנתי תוכניות מדויקות, ישבתי עם הקבלן, ודאגתי שהכול ישב בול.`);
+    parts.push(`אני לא רק מעצבת. אני מחזיקה את כל הפרויקט.`);
+    if (p.client) parts.push(`${p.client}, תודה על האמון 🙏`);
+    parts.push(`אם גם אתם לפני שיפוץ ורוצים תוצאה כזאת, שלחו לי הודעה 😊`);
+    parts.push(`\n#עיצובפנים #מעצבתפנים #ליבנתבניזרי #${p.ptypeTag}${p.loc ? ` #${p.loc.replace(/\s/g,'')}` : ''} #שיפוץ #עיצוב_פנים`);
+    return parts.join('\n\n');
+  },
+
+  (p) => {
+    const parts = [];
+    parts.push(`${p.ptype} שמרגיש בדיוק נכון ✨`);
+    if (p.highlight) parts.push(p.highlight);
+    parts.push(`כשיש תכנון נכון, האור, הצבע, הריהוט, הכול מתחבר ומרגיש בול.\nלא מקרי. לא מזל. תכנון.`);
+    if (p.client) parts.push(`תודה ${p.client} על שיתוף הפעולה הנפלא ❤️`);
+    parts.push(`שאלות? שלחו הודעה, שמחה לעזור 🙌`);
+    parts.push(`\n#${p.ptypeTag} #עיצוב_פנים #ליבנת_בניזרי #מעצבת_פנים${p.loc ? ` #${p.loc.replace(/\s/g,'')}` : ''} #בית_חלומות`);
+    return parts.join('\n\n');
+  },
+
+  (p) => {
+    const parts = [];
+    parts.push(`פחדים מקבלנים, מחומרים, מטעויות יקרות? 😅`);
+    if (p.highlight) parts.push(p.highlight);
+    parts.push(`בדיוק בשביל זה אני כאן.\nאני לא מעצבת רק על הנייר. אני יוצאת לשטח, מדברת עם הקבלן, עוקבת אחר כל שלב.`);
+    if (p.client) parts.push(`${p.client}, הגעתם לתוצאה מושלמת כי עבדנו יחד כל הדרך 💪`);
+    parts.push(`רוצים לדעת איך זה עובד? כתבו לי 👇`);
+    parts.push(`\n#עיצוב_פנים #שיפוץ #מעצבת_פנים #ליבנת_בניזרי #${p.ptypeTag} #ליווי_מלא`);
+    return parts.join('\n\n');
+  },
+];
+
+const paidTemplates = [
+  (p) => {
+    const parts = [];
+    parts.push(`ככה נראה ${p.visual || 'בית'} כשיש תכנון נכון 🏠`);
+    parts.push(`אני ליבנת בניזרי, מעצבת פנים עם 10 שנות ניסיון בשיפוצים.\nלא רק על הנייר. גם בשטח, עם הקבלן, עד הפרט האחרון.`);
+    if (p.usp) parts.push(p.usp);
+    parts.push(`רוצים תוצאה כזאת? שלחו הודעה ונתאם שיחה קצרה 😊`);
+    parts.push(`\n#עיצוב_פנים #מעצבת_פנים #ליבנת_בניזרי #${p.audienceTag} #שיפוץ`);
+    return parts.join('\n\n');
+  },
+
+  (p) => {
+    const parts = [];
+    parts.push(`שיפוץ בקרוב? 🔨`);
+    parts.push(`הדבר הכי יקר בשיפוץ הוא טעות שאפשר היה למנוע.\nאני ליבנת, מעצבת פנים שגדלה מתוך עולם הבנייה.\nמבינה חומרים, מדברת עם קבלנים, ומוודאת שהכול יוצא כמו שתכננו.`);
+    if (p.usp) parts.push(p.usp);
+    parts.push(`כתבו לי ואחזור אליכם 👇`);
+    parts.push(`\n#שיפוץ_בית #עיצוב_פנים #ליבנת_בניזרי #מעצבת_פנים #${p.audienceTag}`);
+    return parts.join('\n\n');
+  },
+];
+
+const audienceTags = { families: 'משפחות', couples: 'זוגות', renovating: 'שיפוץ', new_apt: 'דירה_חדשה', general: 'בית' };
+
+function generatePost(newVariant = false) {
+  if (newVariant) postVariant = (postVariant + 1);
+
+  const btn = document.getElementById('genBtn');
+  btn.innerHTML = '<span class="spinner"></span> יוצר...';
+  btn.disabled = true;
+
+  setTimeout(() => {
+    let text = '';
+    if (currentPostType === 'organic') {
+      const ptype = document.getElementById('projectType').value;
+      const highlight = document.getElementById('projectHighlight').value;
+      const client = document.getElementById('clientDetails').value;
+      const loc = document.getElementById('location').value;
+      const ptypeTag = ptype ? (projectNames[ptype] || ptype).replace(' ','_') : 'עיצוב';
+      const params = { ptype: projectNames[ptype] || 'פרויקט', highlight, client, loc, ptypeTag };
+      const tpl = organicTemplates[postVariant % organicTemplates.length];
+      text = tpl(params);
+    } else {
+      const visual = document.getElementById('adVisual').value;
+      const usp = document.getElementById('adUsp').value;
+      const audience = document.getElementById('adAudience').value;
+      const audienceTag = audienceTags[audience] || 'בית';
+      const tpl = paidTemplates[postVariant % paidTemplates.length];
+      text = tpl({ visual, usp, audienceTag });
+    }
+
+    document.getElementById('postText').textContent = text;
+    document.getElementById('generatedPost').style.display = '';
+    btn.innerHTML = '✨ צור פוסט';
+    btn.disabled = false;
+
+    window._currentPostText = text;
+  }, 600);
+}
+
+function copyPost() {
+  navigator.clipboard.writeText(window._currentPostText || document.getElementById('postText').textContent);
+  notify('הועתק ✓');
+}
+
+function copyPostById(i) {
+  navigator.clipboard.writeText(postHistory[i].text);
+  notify('הועתק ✓');
+}
+
+function savePost() {
+  const text = window._currentPostText || document.getElementById('postText').textContent;
+  const ptype = currentPostType === 'organic' ? document.getElementById('projectType').value : '';
+  const now = new Date();
+  postHistory.unshift({
+    type: currentPostType,
+    project: projectNames[ptype] || 'פוסט',
+    text,
+    date: now.toLocaleDateString('he-IL'),
+  });
+  savePosts();
+  notify('נשמר ✓');
+  renderHistory();
+}
+
+function deletePost(i) {
+  postHistory.splice(i, 1);
+  savePosts();
+  renderHistory();
+}
+
+// ======= UTILS =======
+function notify(msg) {
+  const n = document.getElementById('notif');
+  n.textContent = msg;
+  n.classList.add('show');
+  setTimeout(() => n.classList.remove('show'), 2200);
+}
+
+// ======= COPY HELPERS =======
+function copyPhrase(el) {
+  const text = el.textContent.replace(' 📋','').trim();
+  navigator.clipboard.writeText(text);
+  notify('משפט הועתק ✓');
+}
+function copyHashtags() {
+  const tags = '#עיצובפנים #מעצבתפנים #שיפוץבית #בית #עיצוב_פנים #ליווי_מלא #לפניואחרי #בית_חלומות #ליבנת_בניזרי #מעצבת_פנים_ישראל #עיצוב_מודרני #שיפוץ_הבית #עיצוב_פנים_ישראל';
+  navigator.clipboard.writeText(tags);
+  notify('האשטאגים הועתקו ✓');
+}
+
+// ======= SOCIAL FEED TABS =======
+function showFeed(name, btn) {
+  ['fb','ig','brand'].forEach(n => {
+    const el = document.getElementById('feed-' + n);
+    if (el) el.style.display = 'none';
+  });
+  document.getElementById('feed-' + name).style.display = '';
+  ['fbBtn','igBtn','brandBtn'].forEach(id => {
+    const b = document.getElementById(id);
+    if (b) { b.className = 'btn btn-ghost'; }
+  });
+  const ids = {fb:'fbBtn', ig:'igBtn', brand:'brandBtn'};
+  const activeBtn = document.getElementById(ids[name]);
+  if (activeBtn) activeBtn.className = 'btn btn-primary';
+}
+
+// ======= INIT =======
+render();
+renderHistory();
+</script>
+</body>
+</html>
