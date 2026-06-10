@@ -714,6 +714,28 @@ body { font-family: -apple-system,'Segoe UI',Arial,sans-serif; background:var(--
       <!-- VIDEO PANEL -->
       <div id="videoPanel" style="display:none;">
         <div class="ep-section">
+          <div class="ep-label">פורמט (יחס לרשת)</div>
+          <div class="ep-presets">
+            <button class="ep-preset active" onclick="setVidFormat(this,'original')">מקורי</button>
+            <button class="ep-preset" onclick="setVidFormat(this,'1:1')">1:1</button>
+            <button class="ep-preset" onclick="setVidFormat(this,'4:5')">4:5 פוסט</button>
+            <button class="ep-preset" onclick="setVidFormat(this,'9:16')">9:16 רילס</button>
+          </div>
+          <div style="font-size:.6rem;color:var(--editor-muted);margin-top:6px;">הפורמט והטקסט נצרבים ביצוא (לא מוצגים בתצוגה המקדימה)</div>
+        </div>
+        <div class="ep-section">
+          <div class="ep-label">פילטרים</div>
+          <div class="ep-presets">
+            <button class="ep-preset active" onclick="applyVidPreset(this,'original')">מקורי</button>
+            <button class="ep-preset" onclick="applyVidPreset(this,'warm')">☀️ חם</button>
+            <button class="ep-preset" onclick="applyVidPreset(this,'cool')">❄️ קריר</button>
+            <button class="ep-preset" onclick="applyVidPreset(this,'vivid')">🌈 עז</button>
+            <button class="ep-preset" onclick="applyVidPreset(this,'bw')">⬛ B&W</button>
+            <button class="ep-preset" onclick="applyVidPreset(this,'dramatic')">🎭 דרמטי</button>
+            <button class="ep-preset" onclick="applyVidPreset(this,'bright')">✨ בהיר</button>
+          </div>
+        </div>
+        <div class="ep-section">
           <div class="ep-label">חיתוך</div>
           <div class="trim-bar"><div class="trim-range" id="trimRange"></div></div>
           <div class="trim-handles">
@@ -747,13 +769,45 @@ body { font-family: -apple-system,'Segoe UI',Arial,sans-serif; background:var(--
             <div class="ep-color active" style="background:white;" onclick="setVidTextColor(this,'white')"></div>
             <div class="ep-color" style="background:black;" onclick="setVidTextColor(this,'black')"></div>
             <div class="ep-color" style="background:#c8a45a;" onclick="setVidTextColor(this,'#c8a45a')"></div>
+            <div class="ep-color" style="background:#ff9de2;" onclick="setVidTextColor(this,'#ff9de2')"></div>
           </div>
+          <div class="ep-slider-wrap" style="margin-top:8px;"><div class="ep-sl-top"><span>גודל טקסט</span><span id="valVidTextSize">בינוני</span></div><input class="ep-slider" type="range" min="3" max="11" value="6" id="sVidTextSize" oninput="updateVidTextSize()"></div>
         </div>
         <div class="ep-section">
           <div class="ep-label">כוונון</div>
           <div class="ep-slider-wrap"><div class="ep-sl-top"><span>בהירות</span><span id="valVidBrightness">100%</span></div><input class="ep-slider" type="range" min="0" max="200" value="100" id="sVidBrightness" oninput="applyVideoFilter()"></div>
           <div class="ep-slider-wrap"><div class="ep-sl-top"><span>ניגודיות</span><span id="valVidContrast">100%</span></div><input class="ep-slider" type="range" min="0" max="200" value="100" id="sVidContrast" oninput="applyVideoFilter()"></div>
           <div class="ep-slider-wrap"><div class="ep-sl-top"><span>רוויה</span><span id="valVidSaturate">100%</span></div><input class="ep-slider" type="range" min="0" max="300" value="100" id="sVidSaturate" oninput="applyVideoFilter()"></div>
+        </div>
+        <div class="ep-section">
+          <div class="ep-label">מהירות</div>
+          <div class="ep-presets">
+            <button class="ep-preset" onclick="setVidSpeed(this,0.5)">0.5x</button>
+            <button class="ep-preset active" onclick="setVidSpeed(this,1)">1x</button>
+            <button class="ep-preset" onclick="setVidSpeed(this,1.5)">1.5x</button>
+            <button class="ep-preset" onclick="setVidSpeed(this,2)">2x</button>
+          </div>
+        </div>
+        <div class="ep-section">
+          <div class="ep-label">🎵 מוזיקה</div>
+          <button class="editor-btn editor-btn-ghost editor-btn-sm" style="width:100%;margin-bottom:8px;" onclick="document.getElementById('vidMusicInput').click()">+ העלי שיר משלך</button>
+          <input type="file" id="vidMusicInput" accept="audio/*" style="display:none" onchange="vidLoadMusic(this.files[0]);this.value=''">
+          <div class="ep-label" style="margin-top:2px;">רקע ללא תמלוגים</div>
+          <div class="ep-presets">
+            <button class="ep-preset" onclick="genMusicTo('video','calm',this)">🌙 רגוע</button>
+            <button class="ep-preset" onclick="genMusicTo('video','elegant',this)">✨ אלגנטי</button>
+            <button class="ep-preset" onclick="genMusicTo('video','upbeat',this)">🔥 קצבי</button>
+            <button class="ep-preset" onclick="genMusicTo('video','cinematic',this)">🎬 קולנועי</button>
+          </div>
+          <div id="vidMusicInfo" style="display:none;margin-top:8px;">
+            <div style="display:flex;align-items:center;gap:8px;font-size:.72rem;color:var(--editor-text);">
+              <span>🎵</span><span id="vidMusicName" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></span>
+              <button onclick="vidRemoveMusic()" style="background:none;border:none;color:#ff6b6b;cursor:pointer;">✕</button>
+            </div>
+            <div class="ep-sl-top" style="margin-top:6px;"><span>עוצמת מוזיקה</span><span id="valVidMusicVol">70%</span></div>
+            <input class="ep-slider" type="range" min="0" max="100" value="70" id="sVidMusicVol" oninput="setVidMusicVol(this.value)">
+          </div>
+          <div style="font-size:.6rem;color:var(--editor-muted);margin-top:6px;">שירים חינמיים להורדה: <a href="https://pixabay.com/music/" target="_blank" style="color:var(--gold);">Pixabay</a> · <a href="https://studio.youtube.com/channel/audiolibrary" target="_blank" style="color:var(--gold);">YouTube Audio</a></div>
         </div>
         <div class="ep-section">
           <button class="editor-btn editor-btn-gold" style="width:100%;padding:10px;" onclick="exportVideo()">⬇ ייצא סרטון</button>
@@ -864,6 +918,14 @@ body { font-family: -apple-system,'Segoe UI',Arial,sans-serif; background:var(--
       <div class="rl-panel" id="rlPanel2">
         <button class="rl-add-btn" onclick="document.getElementById('rlMusicInput').click()">+ הוסף מוזיקה</button>
         <input type="file" id="rlMusicInput" accept="audio/*" style="display:none" onchange="rlLoadMusic(this.files[0]);this.value=''">
+        <div class="rl-prop-label" style="margin-top:4px;">מוזיקת רקע ללא תמלוגים</div>
+        <div class="ep-presets" style="margin-bottom:8px;">
+          <button class="ep-preset" onclick="genMusicTo('reels','calm',this)">🌙 רגוע</button>
+          <button class="ep-preset" onclick="genMusicTo('reels','elegant',this)">✨ אלגנטי</button>
+          <button class="ep-preset" onclick="genMusicTo('reels','upbeat',this)">🔥 קצבי</button>
+          <button class="ep-preset" onclick="genMusicTo('reels','cinematic',this)">🎬 קולנועי</button>
+        </div>
+        <div style="font-size:.6rem;color:#777;margin-bottom:8px;">חינמי להורדה: <a href="https://pixabay.com/music/" target="_blank" style="color:var(--gold);">Pixabay</a> · <a href="https://studio.youtube.com/channel/audiolibrary" target="_blank" style="color:var(--gold);">YouTube Audio</a></div>
         <div id="rlMusicInfo" style="display:none;">
           <div class="rl-clip-item selected">
             <div class="rl-clip-thumb">🎵</div>
@@ -1460,7 +1522,33 @@ function editorMakePost() {
   showPage('posts', document.querySelector('.sidebar-nav .nav-item:nth-child(4)'));
   openPostModal('editor');
 }
-// Bake filters + text + trim + voiceover into an actual exported video file
+// ===== VIDEO EDITOR: format / speed / presets / music =====
+let vidFormat = 'original', vidSpeed = 1, vidMusic = null;
+function setVidFormat(btn, f) { vidFormat = f; btn.parentElement.querySelectorAll('.ep-preset').forEach(b => b.classList.remove('active')); btn.classList.add('active'); }
+function setVidSpeed(btn, s) { vidSpeed = s; btn.parentElement.querySelectorAll('.ep-preset').forEach(b => b.classList.remove('active')); btn.classList.add('active'); const v = document.getElementById('editorVideo'); if (v) v.playbackRate = s; }
+function applyVidPreset(btn, name) {
+  btn.parentElement.querySelectorAll('.ep-preset').forEach(b => b.classList.remove('active')); btn.classList.add('active');
+  const P = { original:{br:100,co:100,sa:100}, warm:{br:110,co:105,sa:120}, cool:{br:105,co:105,sa:80}, vivid:{br:110,co:120,sa:160}, bw:{br:100,co:120,sa:0}, dramatic:{br:90,co:150,sa:80}, bright:{br:130,co:100,sa:110} };
+  const p = P[name] || P.original;
+  document.getElementById('sVidBrightness').value = p.br;
+  document.getElementById('sVidContrast').value = p.co;
+  document.getElementById('sVidSaturate').value = p.sa;
+  applyVideoFilter();
+}
+function updateVidTextSize() { const v = parseInt(document.getElementById('sVidTextSize').value) || 6; document.getElementById('valVidTextSize').textContent = v <= 4 ? 'קטן' : v <= 7 ? 'בינוני' : 'גדול'; }
+function vidLoadMusic(file) {
+  if (!file) return;
+  const src = URL.createObjectURL(file), audio = new Audio(src);
+  audio.onloadedmetadata = () => {
+    vidMusic = { file, src, audio, volume: (parseInt(document.getElementById('sVidMusicVol').value) || 70) / 100, duration: audio.duration };
+    document.getElementById('vidMusicInfo').style.display = '';
+    document.getElementById('vidMusicName').textContent = (file.name || 'מוזיקה').slice(0, 28);
+  };
+}
+function vidRemoveMusic() { if (vidMusic) { try { vidMusic.audio.pause(); } catch (e) {} } vidMusic = null; document.getElementById('vidMusicInfo').style.display = 'none'; }
+function setVidMusicVol(v) { document.getElementById('valVidMusicVol').textContent = v + '%'; if (vidMusic) vidMusic.volume = v / 100; }
+
+// Bake filters + format + speed + text + trim + voiceover + music into an exported video file
 function bakeVideoExport() {
   if (!editorItem || editorItem.type !== 'video') { notify('אין סרטון לעריכה'); return; }
   const main = document.getElementById('editorVideo');
@@ -1473,26 +1561,38 @@ function bakeVideoExport() {
   const tA = parseInt(document.getElementById('trimStart').value) / 100 * dur;
   const tB = parseInt(document.getElementById('trimEnd').value) / 100 * dur;
   const start = Math.min(tA, tB), end = Math.max(tA, tB);
+  const speed = vidSpeed || 1;
+  const fsPct = (parseInt(document.getElementById('sVidTextSize').value) || 6) / 100;
   notify('⏳ מייצא סרטון עם העריכות...');
-  // Use a throwaway clone so we never poison the editor video's audio graph
+  // Throwaway clone so we never poison the editor video's audio graph
   const bv = document.createElement('video');
-  bv.src = editorItem.src; bv.muted = false; bv.playsInline = true;
+  bv.src = editorItem.src; bv.muted = true; bv.playsInline = true; bv.playbackRate = speed;
   bv.onloadedmetadata = () => {
-    const cw = bv.videoWidth || 720, ch = bv.videoHeight || 1280;
+    const sw = bv.videoWidth || 720, sh = bv.videoHeight || 1280;
+    const RAT = { '1:1': 1, '4:5': 0.8, '9:16': 9 / 16 };
+    let cw, ch;
+    if (vidFormat === 'original' || !RAT[vidFormat]) { cw = sw; ch = sh; }
+    else { const R = RAT[vidFormat]; if (sw / sh > R) { ch = sh; cw = Math.round(sh * R); } else { cw = sw; ch = Math.round(sw / R); } }
+    cw -= cw % 2; ch -= ch % 2;
     const cvs = document.createElement('canvas'); cvs.width = cw; cvs.height = ch;
     const cx = cvs.getContext('2d');
     const stream = cvs.captureStream(30);
-    let ac;
+    let ac, bakeMu = null;
     try {
       ac = new (window.AudioContext || window.webkitAudioContext)();
       const dest = ac.createMediaStreamDestination();
-      const vSrc = ac.createMediaElementSource(bv); vSrc.connect(dest);
       if (voiceBlob) {
         const av = new Audio(URL.createObjectURL(voiceBlob));
         const aSrc = ac.createMediaElementSource(av); aSrc.connect(dest); aSrc.connect(ac.destination);
         av.play().catch(() => {});
       } else {
-        vSrc.connect(ac.destination);
+        bv.muted = false;
+        const vSrc = ac.createMediaElementSource(bv); vSrc.connect(dest); vSrc.connect(ac.destination);
+      }
+      if (vidMusic) {
+        bakeMu = new Audio(vidMusic.src); bakeMu.loop = true;
+        const mSrc = ac.createMediaElementSource(bakeMu); const mg = ac.createGain(); mg.gain.value = vidMusic.volume;
+        mSrc.connect(mg); mg.connect(dest); mg.connect(ac.destination); bakeMu.play().catch(() => {});
       }
       dest.stream.getAudioTracks().forEach(t => stream.addTrack(t));
     } catch (e) {}
@@ -1504,6 +1604,7 @@ function bakeVideoExport() {
       const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
       a.download = 'ליבנת-וידאו-' + Date.now() + '.webm'; a.click();
       notify('✅ הסרטון יוצא עם כל העריכות');
+      if (bakeMu) { try { bakeMu.pause(); } catch (e) {} }
       if (ac && ac.state !== 'closed') ac.close();
     };
     bv.currentTime = start;
@@ -1512,10 +1613,11 @@ function bakeVideoExport() {
       rec.start(100); bv.play();
       (function draw() {
         if (bv.currentTime >= end || bv.ended) { if (rec.state !== 'inactive') rec.stop(); bv.pause(); return; }
+        const scale = Math.max(cw / sw, ch / sh), dw = sw * scale, dh = sh * scale, dx = (cw - dw) / 2, dy = (ch - dh) / 2;
         cx.filter = `brightness(${br}%) contrast(${co}%) saturate(${sa}%)`;
-        cx.drawImage(bv, 0, 0, cw, ch); cx.filter = 'none';
+        cx.drawImage(bv, dx, dy, dw, dh); cx.filter = 'none';
         if (txt) {
-          const fs = Math.round(ch * 0.05);
+          const fs = Math.round(ch * fsPct);
           cx.font = `bold ${fs}px -apple-system, Arial, sans-serif`;
           cx.textAlign = 'center'; cx.textBaseline = 'middle';
           cx.shadowColor = 'rgba(0,0,0,.9)'; cx.shadowBlur = fs * 0.4; cx.fillStyle = vidTextColor;
@@ -1915,6 +2017,71 @@ function rlExport(){
   },200);
 }
 window.addEventListener('resize',()=>{if(document.getElementById('reelsOverlay').classList.contains('show'))rlResize();});
+
+// ===== GENERATIVE ROYALTY-FREE MUSIC (Web Audio -> WAV, no external deps) =====
+const MUSIC_MOODS = {
+  calm:      { name: 'רגוע',    scale: [0,3,5,7,10], bpm: 70,  root: 48, pad: true,  arp: true,  drums: false, wave: 'sine' },
+  elegant:   { name: 'אלגנטי',  scale: [0,2,4,7,9],  bpm: 84,  root: 52, pad: true,  arp: true,  drums: false, wave: 'triangle' },
+  upbeat:    { name: 'קצבי',    scale: [0,2,4,7,9],  bpm: 110, root: 50, pad: false, arp: true,  drums: true,  wave: 'sawtooth' },
+  cinematic: { name: 'קולנועי', scale: [0,3,5,8,10], bpm: 60,  root: 45, pad: true,  arp: false, drums: false, wave: 'sine' }
+};
+function wavEncode(buf) {
+  const numCh = buf.numberOfChannels, total = buf.length * numCh * 2 + 44;
+  const ab = new ArrayBuffer(total), view = new DataView(ab);
+  const ws = (o, s) => { for (let i = 0; i < s.length; i++) view.setUint8(o + i, s.charCodeAt(i)); };
+  let o = 0;
+  ws(o, 'RIFF'); o += 4; view.setUint32(o, total - 8, true); o += 4; ws(o, 'WAVE'); o += 4;
+  ws(o, 'fmt '); o += 4; view.setUint32(o, 16, true); o += 4; view.setUint16(o, 1, true); o += 2;
+  view.setUint16(o, numCh, true); o += 2; view.setUint32(o, buf.sampleRate, true); o += 4;
+  view.setUint32(o, buf.sampleRate * numCh * 2, true); o += 4; view.setUint16(o, numCh * 2, true); o += 2; view.setUint16(o, 16, true); o += 2;
+  ws(o, 'data'); o += 4; view.setUint32(o, buf.length * numCh * 2, true); o += 4;
+  const chans = []; for (let c = 0; c < numCh; c++) chans.push(buf.getChannelData(c));
+  for (let i = 0; i < buf.length; i++) { for (let c = 0; c < numCh; c++) { let s = Math.max(-1, Math.min(1, chans[c][i])); view.setInt16(o, s < 0 ? s * 0x8000 : s * 0x7FFF, true); o += 2; } }
+  return new Blob([ab], { type: 'audio/wav' });
+}
+async function generateMusic(moodKey, seconds) {
+  const m = MUSIC_MOODS[moodKey] || MUSIC_MOODS.calm;
+  const sr = 44100, dur = Math.max(8, Math.min(60, seconds || 20));
+  const ctx = new OfflineAudioContext(2, Math.ceil(sr * dur), sr);
+  const master = ctx.createGain(); master.gain.value = 0.85; master.connect(ctx.destination);
+  const dl = ctx.createDelay(1.0); dl.delayTime.value = 0.26; const fb = ctx.createGain(); fb.gain.value = 0.28;
+  dl.connect(fb); fb.connect(dl); dl.connect(master);
+  const note = midi => 440 * Math.pow(2, (midi - 69) / 12);
+  const beat = 60 / m.bpm;
+  const sn = (deg, oct) => m.root + m.scale[((deg % m.scale.length) + m.scale.length) % m.scale.length] + 12 * oct;
+  function tone(t, midi, len, gain, wave) {
+    const o = ctx.createOscillator(); o.type = wave; o.frequency.value = note(midi);
+    const g = ctx.createGain(); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(gain, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + len);
+    o.connect(g); g.connect(master); g.connect(dl); o.start(t); o.stop(t + len + 0.05);
+  }
+  function kick(t) {
+    const o = ctx.createOscillator(); o.frequency.setValueAtTime(120, t); o.frequency.exponentialRampToValueAtTime(45, t + 0.12);
+    const g = ctx.createGain(); g.gain.setValueAtTime(0.7, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
+    o.connect(g); g.connect(master); o.start(t); o.stop(t + 0.2);
+  }
+  let t = 0, step = 0, guard = 0;
+  while (t < dur && guard++ < 5000) {
+    const bar = Math.floor(step / 8);
+    if (m.pad && step % 4 === 0) { const deg = [0, 3, 4, 2][bar % 4]; tone(t, sn(deg, 0), beat * 4, 0.12, 'sine'); tone(t, sn(deg + 2, 0), beat * 4, 0.09, 'sine'); tone(t, sn(deg + 4, 0), beat * 4, 0.06, 'sine'); }
+    if (m.arp) { const deg = [0, 2, 4, 3, 4, 2, 1, 4][step % 8]; tone(t, sn(deg, 1), beat * 0.9, 0.10, m.wave); }
+    if (m.drums) { kick(t); if (step % 2 === 1) tone(t, sn(4, 2), 0.05, 0.04, 'square'); }
+    t += beat / (m.arp ? 2 : 1); step++;
+  }
+  const rendered = await ctx.startRendering();
+  return wavEncode(rendered);
+}
+function genMusicTo(target, mood, btn) {
+  let secs;
+  if (target === 'reels') secs = Math.max(10, Math.min(40, Math.ceil(RL.totalDuration) || 20));
+  else { const v = document.getElementById('editorVideo'); const d = v && v.duration ? v.duration : 20; secs = Math.max(8, Math.min(40, Math.ceil(d))); }
+  const orig = btn ? btn.textContent : ''; if (btn) { btn.disabled = true; btn.textContent = '⏳'; }
+  notify('🎵 יוצר מוזיקה...');
+  generateMusic(mood, secs).then(blob => {
+    const file = new File([blob], 'מוזיקת-רקע-' + (MUSIC_MOODS[mood] ? MUSIC_MOODS[mood].name : '') + '.wav', { type: 'audio/wav' });
+    if (target === 'reels') { rlLoadMusic(file); rlTab(2); } else { vidLoadMusic(file); }
+    notify('✅ מוזיקה מוכנה');
+  }).catch(() => notify('שגיאה ביצירת מוזיקה')).finally(() => { if (btn) { btn.disabled = false; btn.textContent = orig; } });
+}
 
 // KEYBOARD SHORTCUTS
 document.addEventListener('keydown', e => {
