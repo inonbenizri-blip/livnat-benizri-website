@@ -807,7 +807,8 @@ body { font-family: -apple-system,'Segoe UI',Arial,sans-serif; background:var(--
             <div class="ep-sl-top" style="margin-top:6px;"><span>עוצמת מוזיקה</span><span id="valVidMusicVol">70%</span></div>
             <input class="ep-slider" type="range" min="0" max="100" value="70" id="sVidMusicVol" oninput="setVidMusicVol(this.value)">
           </div>
-          <div style="font-size:.6rem;color:var(--editor-muted);margin-top:6px;">שירים חינמיים להורדה: <a href="https://pixabay.com/music/" target="_blank" style="color:var(--gold);">Pixabay</a> · <a href="https://studio.youtube.com/channel/audiolibrary" target="_blank" style="color:var(--gold);">YouTube Audio</a></div>
+          <a href="https://suno.com/create" target="_blank" style="display:block;text-align:center;padding:6px;border-radius:8px;background:rgba(200,164,90,.12);color:var(--gold);font-size:.68rem;font-weight:700;text-decoration:none;border:1px dashed rgba(200,164,90,.35);margin-top:8px;">🤖 צור שיר AI עם ווקאל (Suno) ↗</a>
+          <div style="font-size:.6rem;color:var(--editor-muted);margin-top:6px;">אחרי היצירה — הורידי והעלי עם "+ העלי שיר משלך". חינמי: <a href="https://pixabay.com/music/" target="_blank" style="color:var(--gold);">Pixabay</a> · <a href="https://studio.youtube.com/channel/audiolibrary" target="_blank" style="color:var(--gold);">YouTube Audio</a></div>
         </div>
         <div class="ep-section">
           <button class="editor-btn editor-btn-gold" style="width:100%;padding:10px;" onclick="exportVideo()">⬇ ייצא סרטון</button>
@@ -925,7 +926,8 @@ body { font-family: -apple-system,'Segoe UI',Arial,sans-serif; background:var(--
           <button class="ep-preset" onclick="genMusicTo('reels','upbeat',this)">🔥 קצבי</button>
           <button class="ep-preset" onclick="genMusicTo('reels','cinematic',this)">🎬 קולנועי</button>
         </div>
-        <div style="font-size:.6rem;color:#777;margin-bottom:8px;">חינמי להורדה: <a href="https://pixabay.com/music/" target="_blank" style="color:var(--gold);">Pixabay</a> · <a href="https://studio.youtube.com/channel/audiolibrary" target="_blank" style="color:var(--gold);">YouTube Audio</a></div>
+        <a href="https://suno.com/create" target="_blank" style="display:block;text-align:center;padding:7px;border-radius:8px;background:rgba(200,164,90,.12);color:var(--gold);font-size:.7rem;font-weight:700;text-decoration:none;border:1.5px dashed rgba(200,164,90,.35);margin-bottom:6px;">🤖 צור שיר AI עם ווקאל (Suno) ↗</a>
+        <div style="font-size:.58rem;color:#777;margin-bottom:8px;">אחרי היצירה — הורידי והעלי כאן עם "+ הוסף מוזיקה". חינמי: <a href="https://pixabay.com/music/" target="_blank" style="color:var(--gold);">Pixabay</a> · <a href="https://studio.youtube.com/channel/audiolibrary" target="_blank" style="color:var(--gold);">YouTube Audio</a></div>
         <div id="rlMusicInfo" style="display:none;">
           <div class="rl-clip-item selected">
             <div class="rl-clip-thumb">🎵</div>
@@ -1172,6 +1174,7 @@ function selectAll() { mediaItems.forEach(m => selectedIds.add(m.id)); render(fi
 function clearSelection() { selectedIds.clear(); render(filterQuery); }
 function deleteSelected() {
   if (!confirm(`למחוק ${selectedIds.size} קבצים?`)) return;
+  selectedIds.forEach(id => idbDelete(id));
   mediaItems = mediaItems.filter(m => !selectedIds.has(m.id)); selectedIds.clear(); render(filterQuery); notify('נמחקו');
 }
 function updateFab() {
@@ -1199,19 +1202,44 @@ function handleFiles(files) {
         c.width = Math.round(bmp.width*s); c.height = Math.round(bmp.height*s);
         c.getContext('2d').drawImage(bmp,0,0,c.width,c.height);
         item.src = c.toDataURL('image/jpeg',.85); render(filterQuery);
+        c.toBlob(b => { if (b) idbPut({ id, name: file.name, type: 'image', size, blob: b, ts: Date.now() }); }, 'image/jpeg', .85);
       }).catch(() => {
         const fr = new FileReader();
         fr.onload = e => { item.src = e.target.result; render(filterQuery); };
         fr.readAsDataURL(file);
+        idbPut({ id, name: file.name, type: 'image', size, blob: file, ts: Date.now() });
       });
     } else {
-      mediaItems.unshift({ id, name: file.name, type: isVideo?'video':'image', size, src: URL.createObjectURL(file) });
+      const item = { id, name: file.name, type: isVideo?'video':'image', size, src: URL.createObjectURL(file) };
+      mediaItems.unshift(item);
       render(filterQuery);
+      idbPut({ id, name: file.name, type: item.type, size, blob: file, ts: Date.now() });
     }
   });
-  notify(`${files.length} קבצים הועלו ✓`);
+  notify(`${files.length} קבצים הועלו ✓ (נשמרים אוטומטית)`);
 }
 function formatSize(b) { return b > 1e6 ? (b/1e6).toFixed(1)+' MB' : (b/1e3).toFixed(0)+' KB'; }
+
+// ===== PERSISTENCE: keep the gallery across refreshes (IndexedDB, fully local) =====
+let _db = null;
+function idbOpen() {
+  return new Promise((res, rej) => {
+    const r = indexedDB.open('livnat_studio', 1);
+    r.onupgradeneeded = () => { const db = r.result; if (!db.objectStoreNames.contains('media')) db.createObjectStore('media', { keyPath: 'id' }); };
+    r.onsuccess = () => res(r.result);
+    r.onerror = () => rej(r.error);
+  });
+}
+async function idbPut(rec) { try { const db = _db || (_db = await idbOpen()); const tx = db.transaction('media', 'readwrite'); tx.objectStore('media').put(rec); } catch (e) {} }
+async function idbDelete(id) { try { const db = _db || (_db = await idbOpen()); const tx = db.transaction('media', 'readwrite'); tx.objectStore('media').delete(id); } catch (e) {} }
+async function idbAll() { try { const db = _db || (_db = await idbOpen()); return await new Promise(res => { const rq = db.transaction('media', 'readonly').objectStore('media').getAll(); rq.onsuccess = () => res(rq.result || []); rq.onerror = () => res([]); }); } catch (e) { return []; } }
+async function loadSavedMedia() {
+  const recs = await idbAll();
+  if (!recs.length) return;
+  recs.sort((a, b) => (b.ts || 0) - (a.ts || 0));
+  recs.forEach(rec => { try { mediaItems.push({ id: rec.id, name: rec.name, type: rec.type, size: rec.size, src: URL.createObjectURL(rec.blob) }); } catch (e) {} });
+  render(filterQuery);
+}
 
 // DRAG DROP (gallery) — drop files anywhere on the gallery page
 const galleryPage = document.getElementById('page-gallery');
@@ -1735,6 +1763,7 @@ function notify(msg){const t=document.getElementById('toast');t.textContent=msg;
 // INIT
 render();
 renderHistory();
+loadSavedMedia();
 
 // ==================== REELS EDITOR ====================
 const RL={clips:[],texts:[],music:null,currentTime:0,totalDuration:0,playing:false,raf:null,lastTs:null,canvas:null,ctx:null,W:540,H:960,selectedClip:null,selectedText:null,_id:0,TL_PX:60};
