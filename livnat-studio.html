@@ -65,6 +65,8 @@ body { font-family: -apple-system,'Segoe UI',Arial,sans-serif; background:var(--
 /* PAGE */
 .page { padding:28px; display:none; }
 .page.active { display:block; }
+.page.drag-over { outline:3px dashed var(--gold); outline-offset:-12px; background:var(--gold-light); }
+.page.drag-over::after { content:'⬇ שחררי כאן להעלאה'; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:var(--gold); color:#fff; padding:14px 28px; border-radius:50px; font-weight:800; font-size:1rem; z-index:100; pointer-events:none; box-shadow:var(--shadow-lg); }
 
 /* HOME PAGE */
 .home-upload-hero { text-align:center; padding:50px 20px 40px; }
@@ -360,15 +362,16 @@ body { font-family: -apple-system,'Segoe UI',Arial,sans-serif; background:var(--
 .rl-export-overlay{position:absolute;inset:0;background:rgba(0,0,0,.85);z-index:700;display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;}
 .rl-export-overlay.show{display:flex;}
 @media(max-width:700px){
-  .rl-left{width:0;overflow:hidden;}
-  .rl-right{width:160px;}
+  .rl-left{width:130px;}
+  .rl-right{width:150px;}
+  .rl-clip-name{font-size:.62rem;}
 }
 </style>
 </head>
 <body>
 
 <!-- HAMBURGER -->
-<button class="hamburger" id="hamburger" onclick="toggleSidebar()">
+<button class="hamburger" id="hamburger" onclick="toggleSidebar()" aria-label="תפריט">
   <span></span><span></span><span></span>
 </button>
 <div class="mob-overlay" id="mobOverlay" onclick="toggleSidebar()"></div>
@@ -487,7 +490,7 @@ body { font-family: -apple-system,'Segoe UI',Arial,sans-serif; background:var(--
         <div id="emptyState" class="empty" style="column-span:all;">
           <div class="ei">📸</div>
           <h3>עוד לא הועלו קבצים</h3>
-          <p>לחצי על העלאה למעלה</p>
+          <p>לחצי על "העלאה" למעלה, או גררי לכאן תמונות וסרטונים</p>
         </div>
       </div>
     </div>
@@ -515,10 +518,11 @@ body { font-family: -apple-system,'Segoe UI',Arial,sans-serif; background:var(--
             <div class="form-row">
               <label>סוג תוכן</label>
               <select id="dailyType">
+                <option value="story">📈 סיפור לקוח (הכי עובד!)</option>
+                <option value="before_after">לפני ואחרי</option>
                 <option value="finish">סיום פרויקט</option>
                 <option value="progress">תהליך שיפוץ</option>
                 <option value="detail">פרטי עיצוב</option>
-                <option value="before_after">לפני ואחרי</option>
                 <option value="personal">אישי / יום יום</option>
               </select>
             </div>
@@ -650,9 +654,10 @@ body { font-family: -apple-system,'Segoe UI',Arial,sans-serif; background:var(--
   <div class="editor-topbar">
     <button class="editor-btn editor-btn-ghost editor-btn-sm" onclick="closeEditor()">✕ סגור</button>
     <span class="et-title" id="editorTitle">עורך</span>
-    <button class="editor-btn editor-btn-ghost editor-btn-sm" onclick="editorUndo()">↩</button>
+    <button class="editor-btn editor-btn-ghost editor-btn-sm" onclick="editorUndo()" title="בטל פעולה אחרונה">↩</button>
     <button class="editor-btn editor-btn-ghost editor-btn-sm" onclick="showPreview()">👁 תצוגה מקדימה</button>
-    <button class="editor-btn editor-btn-gold editor-btn-sm" onclick="showPreview()">⬇ שמור</button>
+    <button class="editor-btn editor-btn-ghost editor-btn-sm" onclick="editorMakePost()">✍️ צור פוסט</button>
+    <button class="editor-btn editor-btn-gold editor-btn-sm" onclick="editorSave()">⬇ שמור</button>
   </div>
   <div class="editor-body">
     <div class="editor-panel">
@@ -1069,7 +1074,7 @@ function render(query) {
         card.appendChild(vid);
       } else {
         const img = document.createElement('img');
-        img.src = item.src; img.alt = item.name;
+        img.src = item.src; img.alt = item.name; img.loading = 'lazy';
         card.appendChild(img);
       }
     } else {
@@ -1146,12 +1151,17 @@ function handleFiles(files) {
 }
 function formatSize(b) { return b > 1e6 ? (b/1e6).toFixed(1)+' MB' : (b/1e3).toFixed(0)+' KB'; }
 
-// DRAG DROP (gallery)
-const dz = document.getElementById('dropZone');
-if (dz) {
-  dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('over'); });
-  dz.addEventListener('dragleave', () => dz.classList.remove('over'));
-  dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('over'); handleFiles(e.dataTransfer.files); });
+// DRAG DROP (gallery) — drop files anywhere on the gallery page
+const galleryPage = document.getElementById('page-gallery');
+if (galleryPage) {
+  let dragDepth = 0;
+  galleryPage.addEventListener('dragenter', e => { e.preventDefault(); dragDepth++; galleryPage.classList.add('drag-over'); });
+  galleryPage.addEventListener('dragover', e => { e.preventDefault(); });
+  galleryPage.addEventListener('dragleave', e => { e.preventDefault(); if (--dragDepth <= 0) { dragDepth = 0; galleryPage.classList.remove('drag-over'); } });
+  galleryPage.addEventListener('drop', e => {
+    e.preventDefault(); dragDepth = 0; galleryPage.classList.remove('drag-over');
+    if (e.dataTransfer.files && e.dataTransfer.files.length) handleFiles(e.dataTransfer.files);
+  });
 }
 
 // DAILY JOURNAL
@@ -1198,6 +1208,7 @@ function generateDailyRecs() {
 
 function buildRecs(type, desc, count) {
   const typeMap = {
+    story: {label:'סיפור לקוח', main:'פוסט', secondary:'רילס'},
     finish: {label:'סיום פרויקט', main:'פוסט', secondary:'רילס'},
     progress: {label:'תהליך שיפוץ', main:'סטורי', secondary:'פוסט'},
     detail: {label:'פרטי עיצוב', main:'אינסטגרם', secondary:'סטורי'},
@@ -1206,17 +1217,18 @@ function buildRecs(type, desc, count) {
   };
   const t = typeMap[type] || typeMap.finish;
   const descShort = desc ? desc.substring(0,40) : t.label;
+  const isStory = type === 'story' || type === 'before_after';
   return [
     {
       channel: type === 'before_after' ? 'רילס' : (type === 'progress' ? 'סטורי' : 'פוסט'),
       platform: 'אינסטגרם + פייסבוק',
-      text: `${type==='before_after'?'לפני ואחרי':t.label} — ${descShort}. לפרסם בשעות 19:00–21:00 לחשיפה מקסימלית.`,
+      text: `${isStory?'📈 פורמט סיפור — הכי עובד אצלך (פוסט סיפור הגיע ל-277 לייקים!). ':''}${type==='before_after'?'לפני ואחרי':t.label} — ${descShort}. לפרסם בשעות 19:00–21:00 לחשיפה מקסימלית.`,
       caption: generateCaption(type, desc)
     },
     {
       channel: 'סטורי',
       platform: 'אינסטגרם',
-      text: 'סטורי מסכם של ${descShort} — הצג תהליך קצר עם מוזיקה. עדיף בצהריים 12:00–13:00.',
+      text: `סטורי מסכם של ${descShort} — הצג תהליך קצר עם מוזיקה. עדיף בצהריים 12:00–13:00.`,
       caption: null
     },
     ...(count > 2 ? [{
@@ -1230,6 +1242,7 @@ function buildRecs(type, desc, count) {
 
 function generateCaption(type, desc) {
   const captions = {
+    story: `אין לך מושג מאיפה להתחיל? גם ללקוחה הזאת לא היה 👇\n\n${desc||'הגיעה אליי עם חלל שלא עבד לה ותחושת תקיעות. ישבנו, תכננו, וליווינו את כל הדרך — היום היא לא רוצה לצאת מהבית.'}\n\nזה בדיוק מה שאני עושה: לוקחת אותך מהבלגן ועד התוצאה, בשקט נפשי מלא.\nרוצה גם? שלחי לי הודעה 💌\n#עיצובפנים #מעצבתפנים #ליבנתבניזרי`,
     finish: `✨ עוד פרויקט שלם ומרגש!\n${desc||'כשהכל מתחבר בדיוק כמו שתכננו 🤍'}\n\nרוצים תוצאה כזאת? שלחו הודעה 👇\n#עיצובפנים #מעצבתפנים #ליבנתבניזרי`,
     before_after: `לפני ואחרי שמדברים בעד עצמם 🔥\n${desc||'כשתכנון נכון + ביצוע מדויק = קסם'}\n\nשלחו הודעה לפרטים 📲\n#לפניואחרי #שיפוץ #עיצובפנים #ליבנתבניזרי`,
     progress: `כך נראה שיפוץ מבפנים 👀\n${desc||'כל שלב בתכנון, כל פרט בביצוע'}\n#שיפוץבית #עיצובפנים #ליבנתבניזרי`,
@@ -1393,7 +1406,7 @@ function updateTrim() {
   v.currentTime = s;
 }
 
-let voiceRecorder=null,voiceChunks=[],voiceBlob=null,voiceRecording=false,voiceTimer=null,voiceSeconds=0;
+// (voiceover state already declared at the top of the script)
 function toggleVoiceover() { voiceRecording ? stopVoiceover() : startVoiceover(); }
 function startVoiceover() {
   navigator.mediaDevices.getUserMedia({audio:true}).then(stream => {
@@ -1426,7 +1439,7 @@ function downloadVoiceover() {
   const a=document.createElement('a'); a.href=URL.createObjectURL(voiceBlob); a.download='קריינות-'+Date.now()+'.webm'; a.click();
 }
 
-let vidTextPos='bottom', vidTextColor='white';
+// (video text state already declared at the top of the script)
 function setVidTextPos(btn,pos){vidTextPos=pos;document.querySelectorAll('#videoPanel .ep-mini-tab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');}
 function setVidTextColor(el,color){vidTextColor=color;document.querySelectorAll('#videoPanel .ep-color').forEach(e=>e.classList.remove('active'));el.classList.add('active');}
 function applyVideoFilter() {
@@ -1437,11 +1450,82 @@ function applyVideoFilter() {
   document.getElementById('valVidSaturate').textContent=sa+'%';
   v.style.filter=`brightness(${br}%) contrast(${co}%) saturate(${sa}%)`;
 }
-function exportVideo() {
-  const v=document.getElementById('editorVideo');
-  if(!v.src) return;
-  const a=document.createElement('a'); a.href=v.src; a.download='video-'+Date.now()+'.mp4'; a.click();
-  notify('הורדת הסרטון החלה ✓');
+function exportVideo() { bakeVideoExport(); }
+function editorSave() {
+  if (editorItem && editorItem.type === 'video') bakeVideoExport();
+  else confirmDownload();
+}
+function editorMakePost() {
+  closeEditor();
+  showPage('posts', document.querySelector('.sidebar-nav .nav-item:nth-child(4)'));
+  openPostModal('editor');
+}
+// Bake filters + text + trim + voiceover into an actual exported video file
+function bakeVideoExport() {
+  if (!editorItem || editorItem.type !== 'video') { notify('אין סרטון לעריכה'); return; }
+  const main = document.getElementById('editorVideo');
+  const dur = main.duration || 0;
+  if (!dur) { notify('הסרטון עדיין נטען, נסי שוב'); return; }
+  const br = document.getElementById('sVidBrightness').value,
+        co = document.getElementById('sVidContrast').value,
+        sa = document.getElementById('sVidSaturate').value;
+  const txt = (document.getElementById('vidTextInput').value || '').trim();
+  const tA = parseInt(document.getElementById('trimStart').value) / 100 * dur;
+  const tB = parseInt(document.getElementById('trimEnd').value) / 100 * dur;
+  const start = Math.min(tA, tB), end = Math.max(tA, tB);
+  notify('⏳ מייצא סרטון עם העריכות...');
+  // Use a throwaway clone so we never poison the editor video's audio graph
+  const bv = document.createElement('video');
+  bv.src = editorItem.src; bv.muted = false; bv.playsInline = true;
+  bv.onloadedmetadata = () => {
+    const cw = bv.videoWidth || 720, ch = bv.videoHeight || 1280;
+    const cvs = document.createElement('canvas'); cvs.width = cw; cvs.height = ch;
+    const cx = cvs.getContext('2d');
+    const stream = cvs.captureStream(30);
+    let ac;
+    try {
+      ac = new (window.AudioContext || window.webkitAudioContext)();
+      const dest = ac.createMediaStreamDestination();
+      const vSrc = ac.createMediaElementSource(bv); vSrc.connect(dest);
+      if (voiceBlob) {
+        const av = new Audio(URL.createObjectURL(voiceBlob));
+        const aSrc = ac.createMediaElementSource(av); aSrc.connect(dest); aSrc.connect(ac.destination);
+        av.play().catch(() => {});
+      } else {
+        vSrc.connect(ac.destination);
+      }
+      dest.stream.getAudioTracks().forEach(t => stream.addTrack(t));
+    } catch (e) {}
+    const mime = ['video/webm;codecs=vp9', 'video/webm', 'video/mp4'].find(m => { try { return MediaRecorder.isTypeSupported(m); } catch (_) { return false; } }) || 'video/webm';
+    const rec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 6000000 });
+    const chunks = []; rec.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+    rec.onstop = () => {
+      const blob = new Blob(chunks, { type: mime });
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+      a.download = 'ליבנת-וידאו-' + Date.now() + '.webm'; a.click();
+      notify('✅ הסרטון יוצא עם כל העריכות');
+      if (ac && ac.state !== 'closed') ac.close();
+    };
+    bv.currentTime = start;
+    bv.onseeked = () => {
+      bv.onseeked = null;
+      rec.start(100); bv.play();
+      (function draw() {
+        if (bv.currentTime >= end || bv.ended) { if (rec.state !== 'inactive') rec.stop(); bv.pause(); return; }
+        cx.filter = `brightness(${br}%) contrast(${co}%) saturate(${sa}%)`;
+        cx.drawImage(bv, 0, 0, cw, ch); cx.filter = 'none';
+        if (txt) {
+          const fs = Math.round(ch * 0.05);
+          cx.font = `bold ${fs}px -apple-system, Arial, sans-serif`;
+          cx.textAlign = 'center'; cx.textBaseline = 'middle';
+          cx.shadowColor = 'rgba(0,0,0,.9)'; cx.shadowBlur = fs * 0.4; cx.fillStyle = vidTextColor;
+          const y = vidTextPos === 'top' ? fs * 1.6 : vidTextPos === 'center' ? ch / 2 : ch - fs * 1.6;
+          cx.fillText(txt, cw / 2, y); cx.shadowBlur = 0;
+        }
+        requestAnimationFrame(draw);
+      })();
+    };
+  };
 }
 
 function showPreview() {
@@ -1455,12 +1539,11 @@ function showPreview() {
   document.getElementById('previewModal').classList.add('show');
 }
 function confirmDownload() {
-  const canvas=document.getElementById('editorCanvas'), video=document.getElementById('editorVideo');
+  const canvas=document.getElementById('editorCanvas');
   if(editorItem&&editorItem.type==='video'){
-    const a=document.createElement('a'); a.href=video.src; a.download='livnat-video-'+Date.now()+'.mp4'; a.click();
-  } else {
-    const a=document.createElement('a'); a.href=canvas.toDataURL('image/jpeg',0.92); a.download='livnat-'+Date.now()+'.jpg'; a.click();
+    closeModal('previewModal'); bakeVideoExport(); return;
   }
+  const a=document.createElement('a'); a.href=canvas.toDataURL('image/jpeg',0.92); a.download='livnat-'+Date.now()+'.jpg'; a.click();
   closeModal('previewModal'); notify('הורד ✓');
 }
 
@@ -1469,6 +1552,7 @@ const projectNames={salon:'סלון',kitchen:'מטבח',bedroom:'חדר שינה
 const audienceTags={families:'משפחה',couples:'זוג',renovating:'שיפוץ',new_apt:'דירה_חדשה',general:'בית'};
 
 const organicTemplates=[
+  p=>`אין לך מושג מאיפה להתחיל? 👇\n\n${p.hl||'גם הלקוחה הזאת הגיעה אליי ככה — חלל שלא עבד לה ותחושת תקיעות.'}\n\nישבנו, תכננו ${p.ptype?'את ה'+p.ptype:'את החלל'}, וליוויתי את כל הדרך עד הפרט האחרון${p.cl?' עבור '+p.cl:''}${p.loc?'\n📍 '+p.loc:''}\nהיום? בית שעושה חשק להישאר בו 🤍\n\nרוצה גם? שלחי לי הודעה 💌\n#עיצוב_פנים #ליבנת_בניזרי #מעצבת_פנים #${p.pt||'שיפוץ_בית'}`,
   p=>`✨ ${p.ptype?p.ptype+' חדש':'פרויקט חדש'} הושלם!\n\n${p.hl||'כשהכל מתחבר בדיוק כמו שתכננו 🤍'}${p.cl?'\n\nלקוח: '+p.cl:''}${p.loc?'\n📍 '+p.loc:''}\n\nכל פרויקט מספר סיפור — זה הסיפור שלנו 💫\n\n#עיצוב_פנים #ליבנת_בניזרי #מעצבת_פנים #${p.pt||'שיפוץ_בית'} #עיצוב_ישראל`,
   p=>`🏠 ${p.ptype||'פרויקט'} שגורם ללב להתמלא\n\n${p.hl||'כל פרט נבחר בקפידה, כל גוון מחושב'}${p.loc?'\n📍 '+p.loc:''}\n\nזה מה שאני אוהבת בעבודה שלי — לראות את החלום מתממש 🤍\n\n#מעצבת_פנים #עיצוב_פנים #${p.pt||'שיפוץ_בית'} #ליבנת_בניזרי #בית_חדש`,
   p=>`לפעמים מספיקה תמונה אחת להגיד הכל 🤍\n\n${p.hl||'עיצוב שמשלב סגנון, נוחות ופונקציונליות'}${p.cl?'\n✨ עבור '+p.cl:''}\n\nזמינה לפרויקטים חדשים — שלחי הודעה 💌\n\n#ליבנת_בניזרי #עיצוב_פנים #מעצבת_פנים #${p.pt||'בית'} #inspiration`
@@ -1831,6 +1915,20 @@ function rlExport(){
   },200);
 }
 window.addEventListener('resize',()=>{if(document.getElementById('reelsOverlay').classList.contains('show'))rlResize();});
+
+// KEYBOARD SHORTCUTS
+document.addEventListener('keydown', e => {
+  const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement && document.activeElement.tagName);
+  if (e.key === 'Escape') {
+    const openModal = document.querySelector('.modal-bg.show');
+    if (openModal) { openModal.classList.remove('show'); return; }
+    if (document.getElementById('reelsOverlay').classList.contains('show')) { closeReels(); return; }
+    if (document.getElementById('editorOverlay').classList.contains('show')) { closeEditor(); return; }
+  }
+  if (e.key === ' ' && !typing && document.getElementById('reelsOverlay').classList.contains('show')) {
+    e.preventDefault(); rlTogglePlay();
+  }
+});
 </script>
 </body>
 </html>
