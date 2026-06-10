@@ -244,6 +244,7 @@ body { font-family: -apple-system,'Segoe UI',Arial,sans-serif; background:var(--
 .ep-presets { display:flex; flex-wrap:wrap; gap:5px; }
 .ep-preset { padding:5px 10px; border-radius:8px; font-size:.72rem; font-weight:700; cursor:pointer; border:1px solid var(--editor-border); background:transparent; color:#aaa; transition:all .15s; font-family:inherit; }
 .ep-preset.active,.ep-preset:hover { border-color:var(--gold); color:var(--gold); background:rgba(200,164,90,.1); }
+.ep-preset.music-playing { border-color:var(--gold); color:#fff; background:var(--gold); }
 .ep-slider-wrap { margin-bottom:10px; }
 .ep-sl-top { display:flex; justify-content:space-between; font-size:.7rem; color:#777; margin-bottom:4px; }
 .ep-slider { width:100%; -webkit-appearance:none; height:3px; background:var(--editor-border); border-radius:2px; outline:none; cursor:pointer; }
@@ -308,7 +309,13 @@ body { font-family: -apple-system,'Segoe UI',Arial,sans-serif; background:var(--
   .stat-row { grid-template-columns:1fr 1fr; }
   .topbar { padding:0 16px; padding-right:56px; }
   .page { padding:16px; }
-  .editor-panel { width:220px; }
+  /* Editor: stack preview on top (big & visible), controls scroll below */
+  .editor-body { flex-direction:column; }
+  .editor-canvas-area { order:-1; flex:none; height:44vh; min-height:240px; }
+  .editor-panel { width:100%; flex:1; }
+  .editor-topbar { height:auto; flex-wrap:wrap; padding:6px 10px; gap:6px; }
+  .editor-topbar .et-title { flex-basis:100%; order:-1; font-size:.8rem; }
+  #editorVideo, #editorCanvas { max-height:44vh; }
 }
 
 /* ============ REELS EDITOR ============ */
@@ -745,7 +752,7 @@ body { font-family: -apple-system,'Segoe UI',Arial,sans-serif; background:var(--
           <div class="trim-time" id="trimTime">0:00 – 0:00</div>
         </div>
         <div class="ep-section">
-          <div class="ep-label">🎙 קריינות</div>
+          <div class="ep-label">🎙 ווקאל / קריינות (הקול שלך)</div>
           <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
             <button class="editor-btn editor-btn-rec" id="recBtn" onclick="toggleVoiceover()" style="flex:1;">🎙 הקלט קריינות</button>
             <span id="recTimer" style="font-size:.72rem;color:#ff6b6b;min-width:35px;"></span>
@@ -807,8 +814,7 @@ body { font-family: -apple-system,'Segoe UI',Arial,sans-serif; background:var(--
             <div class="ep-sl-top" style="margin-top:6px;"><span>עוצמת מוזיקה</span><span id="valVidMusicVol">70%</span></div>
             <input class="ep-slider" type="range" min="0" max="100" value="70" id="sVidMusicVol" oninput="setVidMusicVol(this.value)">
           </div>
-          <a href="https://suno.com/create" target="_blank" style="display:block;text-align:center;padding:6px;border-radius:8px;background:rgba(200,164,90,.12);color:var(--gold);font-size:.68rem;font-weight:700;text-decoration:none;border:1px dashed rgba(200,164,90,.35);margin-top:8px;">🤖 צור שיר AI עם ווקאל (Suno) ↗</a>
-          <div style="font-size:.6rem;color:var(--editor-muted);margin-top:6px;">אחרי היצירה — הורידי והעלי עם "+ העלי שיר משלך". חינמי: <a href="https://pixabay.com/music/" target="_blank" style="color:var(--gold);">Pixabay</a> · <a href="https://studio.youtube.com/channel/audiolibrary" target="_blank" style="color:var(--gold);">YouTube Audio</a></div>
+          <div style="font-size:.6rem;color:var(--editor-muted);margin-top:6px;">לווקאל — השתמשי ב"🎙 ווקאל / קריינות" למטה: הקול שלך נצרב יחד עם המוזיקה. מוזיקה חינמית: <a href="https://pixabay.com/music/" target="_blank" style="color:var(--gold);">Pixabay</a> · <a href="https://studio.youtube.com/channel/audiolibrary" target="_blank" style="color:var(--gold);">YouTube Audio</a></div>
         </div>
         <div class="ep-section">
           <button class="editor-btn editor-btn-gold" style="width:100%;padding:10px;" onclick="exportVideo()">⬇ ייצא סרטון</button>
@@ -926,8 +932,18 @@ body { font-family: -apple-system,'Segoe UI',Arial,sans-serif; background:var(--
           <button class="ep-preset" onclick="genMusicTo('reels','upbeat',this)">🔥 קצבי</button>
           <button class="ep-preset" onclick="genMusicTo('reels','cinematic',this)">🎬 קולנועי</button>
         </div>
-        <a href="https://suno.com/create" target="_blank" style="display:block;text-align:center;padding:7px;border-radius:8px;background:rgba(200,164,90,.12);color:var(--gold);font-size:.7rem;font-weight:700;text-decoration:none;border:1.5px dashed rgba(200,164,90,.35);margin-bottom:6px;">🤖 צור שיר AI עם ווקאל (Suno) ↗</a>
-        <div style="font-size:.58rem;color:#777;margin-bottom:8px;">אחרי היצירה — הורידי והעלי כאן עם "+ הוסף מוזיקה". חינמי: <a href="https://pixabay.com/music/" target="_blank" style="color:var(--gold);">Pixabay</a> · <a href="https://studio.youtube.com/channel/audiolibrary" target="_blank" style="color:var(--gold);">YouTube Audio</a></div>
+        <div class="rl-prop-label" style="margin-top:8px;">🎙 ווקאל (הקול שלך — ישר באפליקציה)</div>
+        <button class="rl-add-btn" id="rlVocalBtn" onclick="rlToggleVocal()">🎙 הקלטת ווקאל</button>
+        <div id="rlVocalInfo" style="display:none;margin-bottom:8px;">
+          <audio id="rlVocalAudio" controls style="width:100%;border-radius:8px;margin-bottom:4px;"></audio>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <span style="font-size:.6rem;color:#999;">עוצמה</span>
+            <input class="ep-slider" type="range" min="0" max="100" value="100" id="rlVocalVol" oninput="rlSetVocalVol(this.value)" style="flex:1;">
+            <span id="rlVocalVolV" style="font-size:.6rem;color:#999;">100%</span>
+            <button onclick="rlRemoveVocal()" style="background:none;border:none;color:#ff6b6b;cursor:pointer;">✕</button>
+          </div>
+        </div>
+        <div style="font-size:.58rem;color:#777;margin-bottom:8px;">מוזיקה חינמית להורדה: <a href="https://pixabay.com/music/" target="_blank" style="color:var(--gold);">Pixabay</a> · <a href="https://studio.youtube.com/channel/audiolibrary" target="_blank" style="color:var(--gold);">YouTube Audio</a></div>
         <div id="rlMusicInfo" style="display:none;">
           <div class="rl-clip-item selected">
             <div class="rl-clip-thumb">🎵</div>
@@ -1379,7 +1395,7 @@ function openEditorForSelected() {
 function closeEditor() {
   document.getElementById('editorOverlay').classList.remove('show');
   const v = document.getElementById('editorVideo'); v.pause(); v.src = '';
-  stopVoiceover();
+  stopVoiceover(); stopMusicPreview();
   editorItem = null; editorImg = null;
 }
 
@@ -1591,6 +1607,7 @@ function bakeVideoExport() {
   const start = Math.min(tA, tB), end = Math.max(tA, tB);
   const speed = vidSpeed || 1;
   const fsPct = (parseInt(document.getElementById('sVidTextSize').value) || 6) / 100;
+  stopMusicPreview();
   notify('⏳ מייצא סרטון עם העריכות...');
   // Throwaway clone so we never poison the editor video's audio graph
   const bv = document.createElement('video');
@@ -1766,14 +1783,14 @@ renderHistory();
 loadSavedMedia();
 
 // ==================== REELS EDITOR ====================
-const RL={clips:[],texts:[],music:null,currentTime:0,totalDuration:0,playing:false,raf:null,lastTs:null,canvas:null,ctx:null,W:540,H:960,selectedClip:null,selectedText:null,_id:0,TL_PX:60};
+const RL={clips:[],texts:[],music:null,vocal:null,currentTime:0,totalDuration:0,playing:false,raf:null,lastTs:null,canvas:null,ctx:null,W:540,H:960,selectedClip:null,selectedText:null,_id:0,TL_PX:60};
 
 function openReels(){
   document.getElementById('reelsOverlay').classList.add('show');
   if(!RL.canvas){RL.canvas=document.getElementById('rlCanvas');RL.ctx=RL.canvas.getContext('2d');RL.canvas.width=RL.W;RL.canvas.height=RL.H;}
   rlResize();rlDrawFrame();rlUpdateHUD();
 }
-function closeReels(){document.getElementById('reelsOverlay').classList.remove('show');rlPause();}
+function closeReels(){document.getElementById('reelsOverlay').classList.remove('show');rlPause();stopMusicPreview();}
 function rlResize(){
   const center=document.querySelector('.rl-center');if(!center)return;
   const mh=center.clientHeight-70,mw=center.clientWidth-24;
@@ -1942,12 +1959,14 @@ function rlPlay(){
   if(!RL.clips.length||RL.totalDuration<=0)return;
   RL.playing=true;RL.lastTs=null;document.getElementById('rlPlayBtn').textContent='⏸';
   if(RL.music){RL.music.audio.currentTime=RL.currentTime%RL.music.duration;RL.music.audio.play();}
+  if(RL.vocal&&RL.vocal.audio){RL.vocal.audio.currentTime=Math.min(RL.currentTime,RL.vocal.audio.duration||RL.currentTime);RL.vocal.audio.play().catch(()=>{});}
   RL.raf=requestAnimationFrame(rlLoop);
 }
 function rlPause(){
   RL.playing=false;document.getElementById('rlPlayBtn').textContent='▶';
   if(RL.raf){cancelAnimationFrame(RL.raf);RL.raf=null;}
   if(RL.music)RL.music.audio.pause();
+  if(RL.vocal&&RL.vocal.audio)RL.vocal.audio.pause();
   RL.clips.forEach(c=>{if(c.vidEl&&!c.vidEl.paused)c.vidEl.pause();});
 }
 function rlLoop(ts){
@@ -2014,13 +2033,22 @@ function rlPaintTxt(ctx,text,pos,color,size,alpha){
 
 function rlExport(){
   if(!RL.clips.length){notify('הוסף קליפים תחילה');return;}
-  rlPause();
+  rlPause();stopMusicPreview();
   const overlay=document.getElementById('rlExportOverlay');overlay.classList.add('show');
   document.getElementById('rlExportBar').style.width='0%';
   document.getElementById('rlExportStatus').textContent='מכין...';
   setTimeout(()=>{
     const stream=RL.canvas.captureStream(30);
-    if(RL.music){try{const ac=new AudioContext(),src2=ac.createMediaElementSource(RL.music.audio),dest=ac.createMediaStreamDestination();src2.connect(dest);src2.connect(ac.destination);dest.stream.getAudioTracks().forEach(t2=>stream.addTrack(t2));}catch(e){}}
+    let ac=null,exMusic=null,exVocal=null;
+    try{
+      if(RL.music||RL.vocal){
+        ac=new (window.AudioContext||window.webkitAudioContext)();
+        const dest=ac.createMediaStreamDestination();
+        if(RL.music){exMusic=new Audio(RL.music.src);exMusic.loop=true;const s=ac.createMediaElementSource(exMusic);const g=ac.createGain();g.gain.value=RL.music.volume;s.connect(g);g.connect(dest);g.connect(ac.destination);}
+        if(RL.vocal){exVocal=new Audio(RL.vocal.src);const s=ac.createMediaElementSource(exVocal);const g=ac.createGain();g.gain.value=RL.vocal.volume;s.connect(g);g.connect(dest);g.connect(ac.destination);}
+        dest.stream.getAudioTracks().forEach(t2=>stream.addTrack(t2));
+      }
+    }catch(e){}
     const mime=['video/webm;codecs=vp9','video/webm','video/mp4'].find(m=>{try{return MediaRecorder.isTypeSupported(m)}catch(e){return false}})||'video/webm';
     const rec=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:5000000});
     const chunks=[];
@@ -2029,9 +2057,12 @@ function rlExport(){
       const blob=new Blob(chunks,{type:mime}),url=URL.createObjectURL(blob);
       const a=document.createElement('a');a.href=url;a.download='ליבנת-רילס-'+Date.now()+'.webm';a.click();
       overlay.classList.remove('show');notify('✅ הרילס הורד!');
+      if(exMusic){try{exMusic.pause();}catch(e){}}if(exVocal){try{exVocal.pause();}catch(e){}}if(ac&&ac.state!=='closed')ac.close();
     };
     rec.start(100);
-    RL.currentTime=0;if(RL.music){RL.music.audio.currentTime=0;RL.music.audio.play();}
+    RL.currentTime=0;
+    if(exMusic){exMusic.currentTime=0;exMusic.play().catch(()=>{});}
+    if(exVocal){exVocal.currentTime=0;exVocal.play().catch(()=>{});}
     const t0=performance.now();
     function frame(ts){
       const elapsed=(ts-t0)/1000;RL.currentTime=elapsed;
@@ -2040,11 +2071,40 @@ function rlExport(){
       document.getElementById('rlExportStatus').textContent='מייצא '+Math.floor(pct*100)+'%';
       rlDrawFrame();
       if(elapsed<RL.totalDuration){requestAnimationFrame(frame);}
-      else{rec.stop();if(RL.music)RL.music.audio.pause();RL.currentTime=0;rlDrawFrame();rlUpdateHUD();}
+      else{rec.stop();if(exMusic)exMusic.pause();if(exVocal)exVocal.pause();RL.currentTime=0;rlDrawFrame();rlUpdateHUD();}
     }
     requestAnimationFrame(frame);
   },200);
 }
+// ===== REELS VOCAL (in-app voice recording) =====
+let rlVoiceRec=null, rlVoiceChunks=[], rlVoiceRecording=false;
+function rlToggleVocal(){ rlVoiceRecording ? rlStopVocal() : rlStartVocal(); }
+function rlStartVocal(){
+  if(!navigator.mediaDevices){notify('המכשיר לא תומך בהקלטה');return;}
+  navigator.mediaDevices.getUserMedia({audio:true}).then(stream=>{
+    rlVoiceRec=new MediaRecorder(stream); rlVoiceChunks=[];
+    rlVoiceRec.ondataavailable=e=>{if(e.data.size>0)rlVoiceChunks.push(e.data);};
+    rlVoiceRec.onstop=()=>{
+      const blob=new Blob(rlVoiceChunks,{type:'audio/webm'}),src=URL.createObjectURL(blob);
+      const audio=new Audio(src);audio.volume=1;
+      RL.vocal={blob,src,audio,volume:1};
+      stream.getTracks().forEach(t=>t.stop());
+      document.getElementById('rlVocalInfo').style.display='';
+      document.getElementById('rlVocalAudio').src=src;
+    };
+    rlVoiceRec.start(); rlVoiceRecording=true;
+    const b=document.getElementById('rlVocalBtn'); if(b){b.textContent='⏹ עצרי הקלטה';b.style.color='#ff6b6b';}
+    RL.currentTime=0; rlPlay(); // play the reel so you can sing along
+    notify('🎙 מקליט — שירי/דברי על הרילס');
+  }).catch(()=>notify('לא ניתן לגשת למיקרופון'));
+}
+function rlStopVocal(){
+  if(rlVoiceRec&&rlVoiceRecording){try{rlVoiceRec.stop();}catch(e){}}
+  rlVoiceRecording=false; rlPause();
+  const b=document.getElementById('rlVocalBtn'); if(b){b.textContent='🎙 הקלטת ווקאל';b.style.color='';}
+}
+function rlRemoveVocal(){ if(RL.vocal&&RL.vocal.audio){try{RL.vocal.audio.pause();}catch(e){}} RL.vocal=null; document.getElementById('rlVocalInfo').style.display='none'; }
+function rlSetVocalVol(v){ if(RL.vocal){RL.vocal.volume=v/100;if(RL.vocal.audio)RL.vocal.audio.volume=v/100;} document.getElementById('rlVocalVolV').textContent=v+'%'; }
 window.addEventListener('resize',()=>{if(document.getElementById('reelsOverlay').classList.contains('show'))rlResize();});
 
 // ===== GENERATIVE ROYALTY-FREE MUSIC (Web Audio -> WAV, no external deps) =====
@@ -2099,17 +2159,32 @@ async function generateMusic(moodKey, seconds) {
   const rendered = await ctx.startRendering();
   return wavEncode(rendered);
 }
+let _musicPreview = null, _musicPreviewKey = null;
+function stopMusicPreview() {
+  if (_musicPreview) { try { _musicPreview.pause(); } catch (e) {} _musicPreview = null; }
+  _musicPreviewKey = null;
+  document.querySelectorAll('.ep-preset.music-playing').forEach(b => { b.classList.remove('music-playing'); if (b.dataset.label) b.textContent = b.dataset.label; });
+}
 function genMusicTo(target, mood, btn) {
+  const key = target + ':' + mood;
+  // clicking the mood that's already playing stops the preview
+  if (_musicPreviewKey === key) { stopMusicPreview(); return; }
+  stopMusicPreview();
   let secs;
   if (target === 'reels') secs = Math.max(10, Math.min(40, Math.ceil(RL.totalDuration) || 20));
   else { const v = document.getElementById('editorVideo'); const d = v && v.duration ? v.duration : 20; secs = Math.max(8, Math.min(40, Math.ceil(d))); }
-  const orig = btn ? btn.textContent : ''; if (btn) { btn.disabled = true; btn.textContent = '⏳'; }
+  const label = btn ? (btn.dataset.label || btn.textContent) : '';
+  if (btn) { btn.dataset.label = label; btn.disabled = true; btn.textContent = '⏳'; }
   notify('🎵 יוצר מוזיקה...');
   generateMusic(mood, secs).then(blob => {
     const file = new File([blob], 'מוזיקת-רקע-' + (MUSIC_MOODS[mood] ? MUSIC_MOODS[mood].name : '') + '.wav', { type: 'audio/wav' });
     if (target === 'reels') { rlLoadMusic(file); rlTab(2); } else { vidLoadMusic(file); }
-    notify('✅ מוזיקה מוכנה');
-  }).catch(() => notify('שגיאה ביצירת מוזיקה')).finally(() => { if (btn) { btn.disabled = false; btn.textContent = orig; } });
+    // play it immediately so the user hears the choice
+    _musicPreview = new Audio(URL.createObjectURL(blob)); _musicPreview.loop = true; _musicPreview.play().catch(() => {});
+    _musicPreviewKey = key;
+    if (btn) { btn.classList.add('music-playing'); btn.textContent = '⏸ ' + label; }
+    notify('▶ מתנגן — לחצי שוב לעצירה');
+  }).catch(() => { notify('שגיאה ביצירת מוזיקה'); if (btn) btn.textContent = label; }).finally(() => { if (btn) btn.disabled = false; });
 }
 
 // KEYBOARD SHORTCUTS
